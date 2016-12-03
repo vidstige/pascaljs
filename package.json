@@ -7,5 +7,8 @@
     "test": "make test"
   },
   "author": "vidstige <samuel.carlsson@gmail.com>",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "pegjs": "^0.10.0"
+  }
 }
