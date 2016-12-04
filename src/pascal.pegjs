@@ -1,14 +1,25 @@
 {
+    function to_str(x) {
+        return x.join('');
+    }
+    function nth(arr, n) {
+        var results = [];
+        for (var i = 0; i < arr.length; i++) {
+            results.push(arr[i][n]);
+        }
+        return results;
+    }
+
     var procedures = {};
     var functions = {};
-
+8
     // Import builtins
     procedures['WriteLn'] = function (args) { console.log(args) };
 
-    function call_procedure(name) {
+    function call_procedure(name, args) {
         var f = procedures[name];
         if (f) {
-            f('dummy args');
+            f(args);
         } else {
             throw "No such procedure " + name;
         }
@@ -26,7 +37,16 @@ statement "statement"
   = procedure_call ";" _
 
 procedure_call "procedure call"
-  = procedure:identifier _ "(" _ literal _ ")"  { call_procedure(procedure.join("")); }
+  = procedure:identifier _ "(" args:argument_list ")"  { call_procedure(to_str(procedure), args); }
+
+argument_list
+  = first:argument? rest:("," _ argument)* { return [first].concat(nth(rest, 2)); }
+
+argument "argument"
+  = expression
+
+expression "expression"
+  = literal
 
 identifier "identifier"
    = [A-Za-z0-9]+ 
@@ -35,7 +55,7 @@ literal "literal"
   = string_literal
 
 string_literal
-  = "'" [A-Za-z0-9 ]* "'"
+  = "'" s:[A-Za-z0-9 ]* "'"  { return to_str(s); }
 
 _ "whitespace"
-  = [ \t\n\r]*
+  = [ \t\n\r]* { return '' }
