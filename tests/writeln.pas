@@ -1,5 +1,5 @@
 program writeln;
 begin
+    WriteLn('aa', 'bb', 'cc');
     WriteLn('hello world');
-    WriteLn('2nd line');
 end.
