@@ -23,7 +23,7 @@ block
   = "begin" _ statement* _ "end"
 
 statement "statement"
-  = procedure_call ";"
+  = procedure_call ";" _
 
 procedure_call "procedure call"
   = procedure:identifier _ "(" _ literal _ ")"  { call_procedure(procedure.join("")); }
