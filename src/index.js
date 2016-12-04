@@ -1,9 +1,23 @@
 var fs = require('fs');
 var parser = require('./pascal.js')
 
-fs.readFile('tests/first.pas', function (err, data) {
+function verify(filename) {
+    fs.readFile(filename, function (err, data) {
+        if (err) {
+            throw err; 
+        }
+        parser.parse(data.toString());
+    });
+}
+
+const testFolder = 'tests/';
+fs.readdir(testFolder, (err, files) => {
   if (err) {
-    throw err; 
+      throw err;
   }
-  parser.parse(data.toString());
-});
+  files.forEach(file => {
+    console.log(file + "...");
+    verify(testFolder + file);
+  });
+})
+
