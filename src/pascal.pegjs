@@ -5,13 +5,13 @@ block
   = "begin" _ statement? _ "end"
 
 statement "statement"
-  = identifier _ "(" _ ")" _ ";"
+  = identifier _ "(" _ literal _ ")" _ ";"
 
 identifier "identifier"
    = [A-Za-z0-9]+ 
 
 literal "literal"
-  = 'hi'
+  = "'" [A-Za-z0-9 ]* "'"
 
 _ "whitespace"
   = [ \t\n\r]*
