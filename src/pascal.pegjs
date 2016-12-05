@@ -18,6 +18,7 @@
 
     var procedures = {};
     var functions = {};
+    var variables = {};
 
     // Import builtins
     procedures['WriteLn'] = writeln;
@@ -37,10 +38,25 @@ program
   = "program" _ identifier ";" _ block "."
 
 block
-  = "begin" _ statement* _ "end"
+  = declarations? "begin" _ (statement ";" _)* _ "end"
+
+declarations 
+  = vars
+
+vars
+  = "var" _ var+
+  
+var
+  = variable_name:identifier ":" _ type ";" _  { variables[variable_name] = null; }
+
+type "type"
+  = identifier
 
 statement "statement"
-  = procedure_call ";" _
+  = procedure_call / assignment
+
+assignment
+  = variable_name:identifier _ ":=" _ value:expression { variables[variable_name] = value; }
 
 procedure_call "procedure call"
   = procedure:identifier _ "(" args:argument_list ")"  { call_procedure(to_str(procedure), args); }
@@ -52,10 +68,13 @@ argument "argument"
   = expression
 
 expression "expression"
-  = literal
+  = literal / variable
+
+variable "variable"
+  = variable_name:identifier { return variables[variable_name]; } 
 
 identifier "identifier"
-   = [A-Za-z0-9]+ 
+   = [A-Za-z]+ 
 
 literal "literal"
   = string_literal
