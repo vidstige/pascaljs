@@ -1,4 +1,10 @@
 {
+    // --- std unit ----
+    function writeln(args) {
+        console.log(args.join(''));
+    }
+
+    // --- Utils -------
     function to_str(x) {
         return x.join('');
     }
@@ -12,9 +18,9 @@
 
     var procedures = {};
     var functions = {};
-8
+
     // Import builtins
-    procedures['WriteLn'] = function (args) { console.log(args) };
+    procedures['WriteLn'] = writeln;
 
     function call_procedure(name, args) {
         var f = procedures[name];
