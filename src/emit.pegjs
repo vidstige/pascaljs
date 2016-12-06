@@ -17,20 +17,25 @@
 
     
     // emit std unit
-    emit_raw("function WriteLn() { console.log(arguments); }");
+    emit_raw('// Genrated by pascaljs');
+    emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }");
 
     function emit_raw(js) {
       console.log(js);
     }
 
     function emit(node) {
+      var v = node.declarations.variables; 
+      for (var i = 0; i < v.length; i++)
+      {
+        emit_raw("var " + v[i] + ";");
+      }
+
       for (var i = 0; i < node.statements.length; i++)
       {
         emit_raw(node.statements[i]);
       }
     }
-
-    emit_raw('// Genrated by pascaljs');
   }
 
 
@@ -44,19 +49,22 @@ statements
   = all:(statement ";" _)*  { return nth(all, 0); }
 
 declarations 
-  = vars
+  = vars:vars { return {'variables': vars}; }
 
 vars
-  = "var" _ var+
+  = "var" _ vars:var+ { return vars; } 
   
 var
-  = variable_name:identifier ":" _ type ";" _
+  = variable_name:identifier ":" _ type ";" _ { return variable_name; }
 
 type "type"
   = identifier
 
 statement "statement"
-  = procedure_call / assignment
+  = compound / procedure_call / assignment / if_stmt
+
+compound
+  = "begin" _ stmts:statements _ "end" { return '{' + stmts + '}'; }
 
 assignment
   = variable_name:identifier _ ":=" _ value:expression { return variable_name + '=' + value + ';' }
@@ -70,8 +78,24 @@ argument_list
 argument "argument"
   = expression
 
+if_stmt
+  = "if" _ e:expression _ "then" _ stmt1:statement _ "else" _ stmt2:statement { return 'if (' + e + ') ' + stmt1 + ' else ' + stmt2 + ';'; }
+
 expression "expression"
-  = literal / variable
+  = or_expr
+    
+// HERE GOES BOOLEAN OPERATIONS
+or_expr 
+  = first:and_expr rest:( _ "or" _ and_expr )* { return ([first].concat(nth(rest, 3))).join(' || '); }
+
+and_expr
+  = first:base_expr rest:( _ "and" _ base_expr )* { return ([first].concat(nth(rest, 3))).join(' && '); }
+
+base_expr
+  = primary / "(" _ expression _ ")" { return text(); }
+
+primary
+  = literal / variable 
 
 variable "variable"
   = variable_name:identifier 
@@ -80,10 +104,13 @@ identifier "identifier"
    = [A-Za-z][A-Za-z0-9]* { return text(); } 
 
 literal "literal"
-  = string_literal
+  = string_literal / boolean_literal
 
 string_literal
-  = "'" s:[A-Za-z0-9 ]* "'"  { return "'" + to_str(s) + "'"; }
+  = "'" [A-Za-z0-9 ]* "'"  { return text(); }
+
+boolean_literal
+  = "true" / "false"
 
 _ "whitespace"
   = [ \t\n\r]* { return '' }

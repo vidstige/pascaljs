@@ -1,4 +1,5 @@
-pegjs = node_modules/pegjs/bin/pegjs 
+pegjs = node_modules/pegjs/bin/pegjs
+
 $(pegjs):
 	npm install
 
@@ -11,6 +12,9 @@ src/emit.js: src/emit.pegjs $(pegjs)
 test: src/pascal.js src/index.js
 	node src/index.js
 
-emit_spike: src/emit.js src/compile.js
-	node src/compile.js tests/var.pas > build/var.js
+build/%.js: tests/%.pas src/compile.js src/emit.js
+	node src/compile.js $< > $@
+
+emit_spike: build/if1.js build/var.js
 	node build/var.js
+	node build/if1.js
