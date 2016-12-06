@@ -25,10 +25,12 @@
     }
 
     function emit(node) {
-      var v = node.declarations.variables; 
-      for (var i = 0; i < v.length; i++)
-      {
-        emit_raw("var " + v[i] + ";");
+      if (node.declarations) {
+        var v = node.declarations.variables;
+        for (var i = 0; i < v.length; i++)
+        {
+          emit_raw("var " + v[i] + ";");
+        }
       }
 
       for (var i = 0; i < node.statements.length; i++)
