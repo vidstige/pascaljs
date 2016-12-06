@@ -12,4 +12,5 @@ test: src/pascal.js src/index.js
 	node src/index.js
 
 emit_spike: src/emit.js src/compile.js
-	node src/compile.js tests/writeln.pas
+	node src/compile.js tests/var.pas > build/var.js
+	node build/var.js

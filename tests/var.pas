@@ -1,4 +1,4 @@
-program var;
+program v;
 var
     x: Integer;
 begin
