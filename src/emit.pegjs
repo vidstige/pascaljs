@@ -32,6 +32,20 @@
           emit_raw("var " + v[i] + ";");
         }
       }
+      var p = node.declarations.procedures;
+      if (p) {
+        for (var i = 0; i < p.length; i++)
+        {
+          var flat_args = [];
+          for (var j = 0; j < p[i].arguments.length; j++) {
+            flat_args = flat_args.concat(p[i].arguments[j]);
+          }
+
+          emit_raw("function " + p[i].name + "(" + flat_args.join(',') + ") {");
+          emit(p[i].block);
+          emit_raw("}");
+        }
+      }
 
       for (var i = 0; i < node.statements.length; i++)
       {
@@ -55,13 +69,13 @@ declarations
 
 // PROCEDURE DECLARATION
 procedure_declaration 
-  = "procedure" _ proc_name:identifier "(" argument_list_declaration ")" _ ";" _ block ";" _ { return "HI " + proc_name; }
+  = "procedure" _ proc_name:identifier "(" args:argument_list_declaration ")" _ ";" _ block:block ";" _ { return {'name': proc_name, 'arguments': args, 'block': block}; }
 
 argument_list_declaration
   = first:argument_declaration? rest:("," _ argument_declaration)* { return [first].concat(nth(rest, 2)); }
 
 argument_declaration
-  = first:identifier? rest:("," _ identifier)* ":" _ type { [first].concat(nth(rest, 2)); }
+  = first:identifier rest:("," _ identifier)* ":" _ type { return [first].concat(nth(rest, 2)); }
 
 // VARIABLE DECLARATION
 vars
