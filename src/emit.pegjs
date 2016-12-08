@@ -25,8 +25,8 @@
     }
 
     function emit(node) {
-      if (node.declarations) {
-        var v = node.declarations.variables;
+      var v = node.declarations.variables;
+      if (v) {
         for (var i = 0; i < v.length; i++)
         {
           emit_raw("var " + v[i] + ";");
@@ -45,14 +45,25 @@ program
   = "program" _ identifier ";" _ root:block "."  { emit(root); }
 
 block
-  = d:declarations? "begin" _ s:statements _ "end"  { return {'declarations': d, 'statements': s}; }
+  = d:declarations "begin" _ s:statements _ "end" { return {'declarations': d, 'statements': s}; }
 
 statements
   = all:(statement ";" _)*  { return nth(all, 0); }
 
 declarations 
-  = vars:vars { return {'variables': vars}; }
+  = procs:procedure_declaration* vars:vars? { return {'procedures': procs, 'variables': vars}; }
 
+// PROCEDURE DECLARATION
+procedure_declaration 
+  = "procedure" _ proc_name:identifier "(" argument_list_declaration ")" _ ";" _ block ";" _ { return "HI " + proc_name; }
+
+argument_list_declaration
+  = first:argument_declaration? rest:("," _ argument_declaration)* { return [first].concat(nth(rest, 2)); }
+
+argument_declaration
+  = first:identifier? rest:("," _ identifier)* ":" _ type { [first].concat(nth(rest, 2)); }
+
+// VARIABLE DECLARATION
 vars
   = "var" _ vars:var+ { return vars; } 
   
@@ -62,6 +73,7 @@ var
 type "type"
   = identifier
 
+// STATEMENTS
 statement "statement"
   = compound / procedure_call / assignment / if_stmt
 
@@ -105,14 +117,19 @@ variable "variable"
 identifier "identifier"
    = [A-Za-z][A-Za-z0-9]* { return text(); } 
 
+// LITERALS
+
 literal "literal"
-  = string_literal / boolean_literal
+  = string_literal / boolean_literal / integer_literal
 
 string_literal
-  = "'" [A-Za-z0-9 ]* "'"  { return text(); }
+  = "'" [A-Za-z0-9 ,;:]* "'"  { return text(); }
 
 boolean_literal
   = "true" / "false"
+
+integer_literal
+  = [0-9]+
 
 _ "whitespace"
   = [ \t\n\r]* { return '' }
