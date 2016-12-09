@@ -42,7 +42,13 @@
           }
 
           emit_raw("function " + p[i].name + "(" + flat_args.join(',') + ") {");
-          emit(p[i].block);
+          if (p[i].ret) {
+            emit_raw('var ' + p[i].name + ";");
+            emit(p[i].block);
+            emit_raw('return ' + p[i].name + ";");
+          } else {
+            emit(p[i].block);
+          }
           emit_raw("}");
         }
       }
@@ -65,11 +71,14 @@ statements
   = all:(statement ";" _)*  { return nth(all, 0); }
 
 declarations 
-  = procs:procedure_declaration* vars:vars? { return {'procedures': procs, 'variables': vars}; }
+  = procs:(procedure_declaration / function_declaration)* vars:vars? { return {'procedures': procs, 'variables': vars}; }
 
 // PROCEDURE DECLARATION
 procedure_declaration 
-  = "procedure" _ proc_name:identifier "(" args:argument_list_declaration ")" _ ";" _ block:block ";" _ { return {'name': proc_name, 'arguments': args, 'block': block}; }
+  = "procedure" _ name:identifier "(" args:argument_list_declaration ")" _ ";" _ block:block ";" _ { return {'name': name, 'arguments': args, 'block': block, 'ret': false}; }
+
+function_declaration 
+  = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ type ";" _ block:block ";" _ { return {'name': name, 'arguments': args, 'block': block, 'ret': true}; }
 
 argument_list_declaration
   = first:argument_declaration? rest:("," _ argument_declaration)* { return [first].concat(nth(rest, 2)); }
@@ -109,10 +118,13 @@ argument "argument"
 if_stmt
   = "if" _ e:expression _ "then" _ stmt1:statement _ "else" _ stmt2:statement { return 'if (' + e + ') ' + stmt1 + ' else ' + stmt2 + ';'; }
 
+// HERE GOES EXPRESSOINS
+function_call "function call"
+  = func:identifier _ "(" args:argument_list ")"  { return func + '(' + args + ')'; }
+
 expression "expression"
   = or_expr
     
-// HERE GOES BOOLEAN OPERATIONS
 or_expr 
   = first:and_expr rest:( _ "or" _ and_expr )* { return ([first].concat(nth(rest, 3))).join(' || '); }
 
@@ -123,7 +135,7 @@ base_expr
   = primary / "(" _ expression _ ")" { return text(); }
 
 primary
-  = literal / variable 
+  = function_call / literal / variable 
 
 variable "variable"
   = variable_name:identifier 
