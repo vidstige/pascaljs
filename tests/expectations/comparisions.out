@@ -1,0 +1,6 @@
+x = y  false
+x >= y false
+x <= y true
+x <> y true
+x > y  false
+x < y  true
