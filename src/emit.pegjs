@@ -113,7 +113,7 @@ type "type"
 
 // STATEMENTS
 statement "statement"
-  = compound / procedure_call / assignment / if_stmt
+  = compound / procedure_call / assignment / if_stmt / for
 
 compound
   = "begin" _ stmts:statements _ "end" { return '{' + stmts + '}'; }
@@ -132,6 +132,9 @@ argument "argument"
 
 if_stmt
   = "if" _ e:expression _ "then" _ stmt1:statement _ "else" _ stmt2:statement { return 'if (' + e + ') ' + stmt1 + ' else ' + stmt2 + ';'; }
+
+for
+  = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return 'for (' + variable + "=" + start + ";" + variable + "<" + stop + ";" + "i++) {" + stmt + "}"; } 
 
 // HERE GOES EXPRESSOINS
 function_call "function call"
@@ -178,7 +181,7 @@ boolean_literal
   = "true" / "false"
 
 integer_literal
-  = [0-9]+
+  = [0-9]+ { return text(); }
 
 _ "whitespace"
   = [ \t\n\r]* { return '' }
