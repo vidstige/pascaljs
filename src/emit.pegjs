@@ -138,8 +138,16 @@ function_call "function call"
   = func:identifier _ "(" args:argument_list ")"  { return func + '(' + args + ')'; }
 
 expression "expression"
-  = or_expr
-    
+  = comparision / or_expr
+
+comparision
+  = a:or_expr _ "=" _ b:or_expr { return [a, '==', b].join(''); }
+  / a:or_expr _ "<>" _ b:or_expr { return [a, '!=', b].join(''); }
+  / a:or_expr _ ">=" _ b:or_expr { return [a, '>=', b].join(''); }
+  / a:or_expr _ "<=" _ b:or_expr { return [a, '<=', b].join(''); }
+  / a:or_expr _ ">" _ b:or_expr { return [a, '>', b].join(''); }
+  / a:or_expr _ "<" _ b:or_expr { return [a, '<', b].join(''); }
+
 or_expr 
   = first:and_expr rest:( _ ("or" / "+") _ and_expr )* { return buildList(first, rest, 3,  1, {'or': '||'}); }
 
@@ -150,7 +158,7 @@ base_expr
   = primary / "(" _ expression _ ")" { return text(); }
 
 primary
-  = function_call / literal / variable 
+  = function_call / literal / variable
 
 variable "variable"
   = variable_name:identifier 
@@ -164,7 +172,7 @@ literal "literal"
   = string_literal / boolean_literal / integer_literal
 
 string_literal
-  = "'" [A-Za-z0-9 ,;:+/=]* "'"  { return text(); }
+  = "'" [A-Za-z0-9 ,;:+/=<>]* "'"  { return text(); }
 
 boolean_literal
   = "true" / "false"
