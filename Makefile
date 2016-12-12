@@ -15,6 +15,6 @@ test: $(OBJS) $(EXPECTED) verify.sh
 
 build/%.js: tests/%.pas src/compile.js src/emit.js
 	@mkdir -p build/
-	node src/compile.js $< > $@
+	node src/compile.js $< > $@ || rm $@
 
 .PHONY: test
