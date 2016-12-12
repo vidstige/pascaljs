@@ -10,6 +10,21 @@
         }
         return results;
     }
+    function buildList(first, rest, n, joiner, join_translation) {
+      var results = first ? [first] : [];
+      for (var i = 0; i < rest.length; i++) {
+        if (joiner) {
+          var j = rest[i][joiner];
+          if (j in join_translation) {
+            results.push(join_translation[j]);
+          } else {
+            results.push(j);
+          }
+        }
+        results.push(rest[i][n]);
+      }
+      return results.join(' ');
+    } 
 
     var procedures = {};
     var functions = {};
@@ -126,10 +141,10 @@ expression "expression"
   = or_expr
     
 or_expr 
-  = first:and_expr rest:( _ "or" _ and_expr )* { return ([first].concat(nth(rest, 3))).join(' || '); }
+  = first:and_expr rest:( _ ("or" / "+") _ and_expr )* { return buildList(first, rest, 3,  1, {'or': '||'}); }
 
 and_expr
-  = first:base_expr rest:( _ "and" _ base_expr )* { return ([first].concat(nth(rest, 3))).join(' && '); }
+  = first:base_expr rest:( _ ("and" / "*") _ base_expr )* { return buildList(first, rest, 3,  1, {'and': '&&'}); }
 
 base_expr
   = primary / "(" _ expression _ ")" { return text(); }
@@ -149,7 +164,7 @@ literal "literal"
   = string_literal / boolean_literal / integer_literal
 
 string_literal
-  = "'" [A-Za-z0-9 ,;:]* "'"  { return text(); }
+  = "'" [A-Za-z0-9 ,;:+/=]* "'"  { return text(); }
 
 boolean_literal
   = "true" / "false"
