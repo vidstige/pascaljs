@@ -17,4 +17,7 @@ build/%.js: tests/%.pas src/compile.js src/emit.js
 	@mkdir -p build/
 	node src/compile.js $< > $@ || rm $@
 
-.PHONY: test
+clean:
+	rm -rf src/emit.js build/
+
+.PHONY: test clean
