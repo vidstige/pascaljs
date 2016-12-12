@@ -134,7 +134,7 @@ if_stmt
   = "if" _ e:expression _ "then" _ stmt1:statement _ "else" _ stmt2:statement { return 'if (' + e + ') ' + stmt1 + ' else ' + stmt2 + ';'; }
 
 for
-  = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return 'for (' + variable + "=" + start + ";" + variable + "<" + stop + ";" + "i++) {" + stmt + "}"; } 
+  = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return 'for (' + variable + "=" + start + ";" + variable + (direction=="to" ? "<=" : ">=") + stop + ";" + (direction == "to" ? "i++" : "i--") +")" + stmt; } 
 
 // HERE GOES EXPRESSOINS
 function_call "function call"
