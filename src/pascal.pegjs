@@ -1,78 +1,34 @@
 {
-    // --- Utils -------
-    function to_str(x) {
-        return x.join('');
-    }
-    function nth(arr, n) {
-        var results = [];
-        for (var i = 0; i < arr.length; i++) {
-            results.push(arr[i][n]);
-        }
-        return results;
-    }
-    function buildList(first, rest, n, joiner, join_translation) {
-      var results = first ? [first] : [];
-      for (var i = 0; i < rest.length; i++) {
-        if (joiner) {
-          var j = rest[i][joiner];
-          if (j in join_translation) {
-            results.push(join_translation[j]);
-          } else {
-            results.push(j);
-          }
-        }
-        results.push(rest[i][n]);
-      }
-      return results.join(' ');
-    } 
-    
-    // emit std unit
-    emit_raw('// Genrated by pascaljs');
-    emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }");
-
-    function emit_raw(js) {
-      console.log(js);
-    }
-
-    function emit(node) {
-      var v = node.declarations.variables;
-      if (v) {
-        for (var i = 0; i < v.length; i++)
-        {
-          emit_raw("var " + v[i] + ";");
-        }
-      }
-      var p = node.declarations.procedures;
-      if (p) {
-        for (var i = 0; i < p.length; i++)
-        {
-          var flat_args = [];
-          for (var j = 0; j < p[i].arguments.length; j++) {
-            flat_args = flat_args.concat(p[i].arguments[j]);
-          }
-
-          emit_raw("function " + p[i].name + "(" + flat_args.join(',') + ") {");
-          if (p[i].ret) {
-            emit_raw('var ' + p[i].name + ";");
-            emit(p[i].block);
-            emit_raw('return ' + p[i].name + ";");
-          } else {
-            emit(p[i].block);
-          }
-          emit_raw("}");
-        }
-      }
-
-      for (var i = 0; i < node.statements.length; i++)
-      {
-        emit_raw(node.statements[i]);
-      }
-    }
+  // --- Utils -------
+  function to_str(x) {
+      return x.join('');
   }
-
+  function nth(arr, n) {
+      var results = [];
+      for (var i = 0; i < arr.length; i++) {
+          results.push(arr[i][n]);
+      }
+      return results;
+  }
+  function buildList(first, rest, n, joiner, join_translation) {
+    var results = first ? [first] : [];
+    for (var i = 0; i < rest.length; i++) {
+      if (joiner) {
+        var j = rest[i][joiner];
+        if (j in join_translation) {
+          results.push(join_translation[j]);
+        } else {
+          results.push(j);
+        }
+      }
+      results.push(rest[i][n]);
+    }
+    return results.join(' ');
+  }
+}
 
 program
-  = "program" _ identifier ";" _ root:block "."  { emit(root); }
+  = "program" _ identifier ";" _ root:block "."  { return root; }
 
 block
   = d:declarations "begin" _ s:statements _ "end" { return {'declarations': d, 'statements': s}; }
