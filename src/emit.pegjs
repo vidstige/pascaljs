@@ -112,7 +112,7 @@ type "type"
   = identifier
 
 // STATEMENTS
-statement "statement"
+statement
   = compound / procedure_call / assignment / if_stmt / for
 
 compound
@@ -121,13 +121,13 @@ compound
 assignment
   = variable_name:identifier _ ":=" _ value:expression { return variable_name + '=' + value + ';' }
 
-procedure_call "procedure call"
+procedure_call
   = procedure:identifier _ "(" args:argument_list ")"  { return procedure + '(' + args + ');'; }
 
 argument_list
   = first:argument? rest:("," _ argument)* { return [first].concat(nth(rest, 2)); }
 
-argument "argument"
+argument
   = expression
 
 if_stmt
