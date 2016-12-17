@@ -1,6 +1,7 @@
 var fs = require('fs');
 var path = require('path');
 var parser = require('./pascal.js')
+var emitter = require('./backend/js.js');
 
 function repeat(str, n) {
     return Array(n + 1).join(str);
@@ -10,10 +11,11 @@ var filepath = process.argv[2];
 var pascal_source = fs.readFileSync(filepath, "utf8");
 
 try {
-    parser.parse(pascal_source);
+    var ast = parser.parse(pascal_source);
+    emitter.emit(ast);
 } catch (e) {
     
-    if (e instanceof(emitter.SyntaxError)) {
+    if (e instanceof(parser.SyntaxError)) {
         console.error(e.message);
         var location = e.location;
         var lines = pascal_source.split(/\r?\n/);
