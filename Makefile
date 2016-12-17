@@ -7,17 +7,17 @@ EXPECTED=$(patsubst tests/%.pas,tests/expectations/%.out,$(SRCS))
 $(pegjs):
 	npm install
 
-src/emit.js: src/emit.pegjs $(pegjs)
-	$(pegjs) src/emit.pegjs
+src/pascal.js: src/pascal.pegjs $(pegjs)
+	$(pegjs) src/pascal.pegjs
 
 test: $(OBJS) $(EXPECTED) verify.sh
 	@./verify.sh "$(OBJS)"
 
-build/%.js: tests/%.pas src/compile.js src/emit.js
+build/%.js: tests/%.pas src/compile.js src/pascal.js
 	@mkdir -p build/
 	node src/compile.js $< > $@ || rm $@
 
 clean:
-	rm -rf src/emit.js build/
+	rm -rf src/pascal.js build/
 
 .PHONY: test clean
