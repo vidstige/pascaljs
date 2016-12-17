@@ -25,11 +25,6 @@
       }
       return results.join(' ');
     } 
-
-    var procedures = {};
-    var functions = {};
-    var variables = {};
-
     
     // emit std unit
     emit_raw('// Genrated by pascaljs');
