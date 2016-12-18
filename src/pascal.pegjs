@@ -67,13 +67,13 @@ statement
   = compound / procedure_call / assignment / if_stmt / for
 
 compound
-  = "begin" _ stmts:statements _ "end" { return stmts; }
+  = "begin" _ stmts:statements _ "end" { return {'statement': 'compound', 'statements': stmts}; }
 
 assignment
-  = variable_name:identifier _ ":=" _ value:expression { return variable_name + '=' + value + ';' }
+  = variable_name:identifier _ ":=" _ value:expression { return {'statement': 'assignment', 'to': variable_name, 'from': value}; }
 
 procedure_call
-  = procedure:identifier _ "(" args:argument_list ")"  { return procedure + '(' + args + ');'; }
+  = procedure:identifier _ "(" args:argument_list ")"  { return {'statement': 'call', 'target': procedure, 'arguments': args}; }
 
 argument_list
   = first:argument? rest:("," _ argument)* { return [first].concat(nth(rest, 2)); }
@@ -82,10 +82,10 @@ argument
   = expression
 
 if_stmt
-  = "if" _ e:expression _ "then" _ stmt1:statement _ "else" _ stmt2:statement { return 'if (' + e + ') ' + stmt1 + ' else ' + stmt2 + ';'; }
+  = "if" _ e:expression _ "then" _ stmt1:statement _ "else" _ stmt2:statement { return {'statement': 'if', 'condition': e, 'then': stmt1, 'else': stmt2}; }
 
 for
-  = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return 'for (' + variable + "=" + start + ";" + variable + (direction=="to" ? "<=" : ">=") + stop + ";" + (direction == "to" ? "i++" : "i--") +")" + stmt; } 
+  = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return {'statement': 'for', 'variable': variable, 'start': start, 'stop': stop, 'direction': direction, 'do': stmt }; }
 
 // HERE GOES EXPRESSOINS
 function_call "function call"
