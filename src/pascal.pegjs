@@ -137,7 +137,10 @@ literal "literal"
   = string_literal / boolean_literal / integer_literal
 
 string_literal
-  = "'" [A-Za-z0-9 ,;:+/=<>]* "'"  { return text(); }
+  = "'" string_character* "'"  { return text(); }
+
+string_character
+  = !("'") .
 
 boolean_literal
   = "true" / "false"
