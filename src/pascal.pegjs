@@ -56,11 +56,15 @@ argument_declaration
 vars
   = "var" _ vars:var+ { return vars; } 
   
+// TODO: Reuse argument_declaration
 var
-  = variable_name:identifier ":" _ type ";" _ { return variable_name; }
+  = variable_name:identifier ":" _ type:type ";" _ { return {'name': variable_name, 'type': type}; }
 
+// TODO: Allow const ints for bounds
+// TODO: Return proper ast for array types.
 type "type"
-  = identifier
+  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ identifier { return 'array' ;}
+  / identifier
 
 // STATEMENTS
 statement
@@ -70,7 +74,11 @@ compound
   = "begin" _ stmts:statements _ "end" { return {'statement': 'compound', 'statements': stmts}; }
 
 assignment
-  = variable_name:identifier _ ":=" _ value:expression { return {'statement': 'assignment', 'to': variable_name, 'from': value}; }
+  = lvalue:lvalue _ ":=" _ value:expression { return {'statement': 'assignment', 'to': lvalue, 'from': value}; }
+
+lvalue
+  = variable:identifier _ "[" _ indexer:expression _ "]" { return {'variable': variable, 'indexer': indexer}; }
+  / variable:identifier { return {'variable': variable}; }
 
 procedure_call
   = procedure:identifier _ "(" args:argument_list ")"  { return {'statement': 'call', 'target': procedure, 'arguments': args}; }
@@ -112,7 +120,10 @@ base_expr
   = primary / "(" _ expression _ ")" { return text(); }
 
 primary
-  = function_call / literal / variable
+  = function_call / array_lookup / literal / variable
+
+array_lookup
+  = variable _ "[" _ expression _ "]" { return text(); }
 
 variable "variable"
   = variable_name:identifier 

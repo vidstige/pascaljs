@@ -15,7 +15,11 @@ function emit_statement(stmt) {
       emit_raw(stmt.target + '(' + stmt.arguments.join(', ') + ');');
       break;
     case 'assignment':
-      emit_raw(stmt.to + ' = '  + stmt.from);
+      if (stmt.to.indexer) {
+        emit_raw(stmt.to.variable + "[" + stmt.to.indexer + "]" + ' = '  + stmt.from + ";");
+      } else {
+        emit_raw(stmt.to.variable + ' = '  + stmt.from + ";");
+      }
       break;
     case 'for':
       var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
@@ -47,7 +51,11 @@ function emit_node(node) {
   if (v) {
     for (var i = 0; i < v.length; i++)
     {
-      emit_raw("var " + v[i] + ";");
+      if (v[i].type == "array") {
+        emit_raw("var " + v[i].name + " = [];");
+      } else {
+        emit_raw("var " + v[i].name + ";");
+      }
     }
   }
   var p = node.declarations.procedures;
