@@ -27,6 +27,7 @@ try {
         }
     } else {
         console.error(e);
+        throw e;
     }
     
     process.exit(-1);
