@@ -12,14 +12,18 @@ for obj in $1; do
   tmp="${obj/build/tests/expectations}"
   expected="${tmp%.js}.out"
   test_name=`basename ${obj%.js}`
-  if [ -f $expected ]; then
-    actual=$(mktemp /tmp/pascaljs.XXXXXX)
-    node $obj > $actual && diff $actual $expected
-    success=$?
-    rm "$actual"
+  if [ -f $obj ]; then
+    if [ -f $expected ]; then
+      actual=$(mktemp /tmp/pascaljs.XXXXXX)
+      node $obj > $actual && diff $actual $expected
+      success=$?
+      rm "$actual"
+    else
+      node $obj > /dev/null
+      success=$?
+    fi
   else
-    node $obj > /dev/null
-    success=$?
+    success=255
   fi
   if [ ! $success -eq 0 ]; then
     ((fails++))
