@@ -4,12 +4,7 @@ function emit_raw(js) {
   console.log(js);
 }
 
-function emit(ast) {
-  var node = ast;
-  // emit std unit
-  emit_raw('// Genrated by pascaljs');
-  emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }");
-
+function emit_node(node) {
   var v = node.declarations.variables;
   if (v) {
     for (var i = 0; i < v.length; i++)
@@ -29,7 +24,7 @@ function emit(ast) {
       emit_raw("function " + p[i].name + "(" + flat_args.join(',') + ") {");
       if (p[i].ret) {
         emit_raw('var ' + p[i].name + ";");
-        emit(p[i].block);
+        emit_node(p[i].block);
         emit_raw('return ' + p[i].name + ";");
       } else {
         emit(p[i].block);
@@ -44,6 +39,14 @@ function emit(ast) {
     emit_raw(node.statements[i]);
   }
   emit_raw('}');
+}
+
+function emit(ast) {
+  // emit std unit
+  emit_raw('// Genrated by pascaljs');
+  emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }");
+
+  emit_node(ast);
 }
 
 module.exports = {
