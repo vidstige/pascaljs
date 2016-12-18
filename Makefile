@@ -13,7 +13,7 @@ src/pascal.js: src/pascal.pegjs $(pegjs)
 test: $(OBJS) $(EXPECTED) verify.sh
 	@./verify.sh "$(OBJS)"
 
-build/%.js: tests/%.pas src/compile.js src/pascal.js
+build/%.js: tests/%.pas src/compile.js src/pascal.js src/backend/js.js
 	@mkdir -p build/
 	node src/compile.js $< > $@ || rm $@
 
