@@ -67,7 +67,7 @@ statement
   = compound / procedure_call / assignment / if_stmt / for
 
 compound
-  = "begin" _ stmts:statements _ "end" { return '{' + stmts + '}'; }
+  = "begin" _ stmts:statements _ "end" { return stmts; }
 
 assignment
   = variable_name:identifier _ ":=" _ value:expression { return variable_name + '=' + value + ';' }

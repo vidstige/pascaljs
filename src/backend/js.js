@@ -38,10 +38,12 @@ function emit(ast) {
     }
   }
 
+  emit_raw('{');
   for (var i = 0; i < node.statements.length; i++)
   {
     emit_raw(node.statements[i]);
   }
+  emit_raw('}');
 }
 
 module.exports = {
