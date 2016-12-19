@@ -1,8 +1,8 @@
 program Sample;
-procedure Output(A,B: Integer);
+procedure Output(A,B: Integer; C: String);
 begin
-    WriteLn(A, ', ', B); 
+    WriteLn(A, ', ', B, ', ', C); 
 end;
 begin
-  Output(7, 8);
+  Output(7, 8, 'C');
 end.
