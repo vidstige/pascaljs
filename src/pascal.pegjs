@@ -37,7 +37,7 @@ statements
   = all:(statement ";" _)*  { return nth(all, 0); }
 
 declarations 
-  = constants:constants? procs:(procedure_declaration / function_declaration)* vars:vars? { return {'constants': constants, 'procedures': procs, 'variables': vars}; }
+  = types:types? constants:constants? procs:(procedure_declaration / function_declaration)* vars:vars? { return {'types': types, 'constants': constants, 'procedures': procs, 'variables': vars}; }
 
 // PROCEDURE DECLARATION
 procedure_declaration 
@@ -52,6 +52,14 @@ argument_list_declaration
 argument_declaration
   = first:identifier rest:("," _ identifier)* ":" _ type { return [first].concat(nth(rest, 2)); }
 
+// types
+types
+  = "type" _ types:type_declaration+ { return types; }
+
+type_declaration
+  = alias:identifier _ "=" _ type_name:type _ ";" _ { return {'alias': alias, 'type_name': type_name}; } 
+
+
 // CONSTANTS
 constants
   = "const" _ constants:constant+ { return constants; }
@@ -59,6 +67,7 @@ constants
 // TODO: Use constexpr instead of literal
 constant
   = constant_name:identifier _ "=" _ value:literal _ ";" _ { return {'name':constant_name, 'value': value}; }
+
 
 // VARIABLE DECLARATION
 vars

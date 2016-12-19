@@ -30,15 +30,17 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [x] Arithmetic operators
 - [x] Comparisions
 - [x] Function calls
+- [ ] Pointers
 
 ### Declarations
 - [x] Procedures
 - [x] Functions
 - [x] Variabes
 - [x] Constants
-- [ ] Type aliases
+- [x] Type aliases
 - [ ] Records
 - [x] Arrays
+- [ ] Mix declaration order
 - [ ] Real
 
 ### Assembler
