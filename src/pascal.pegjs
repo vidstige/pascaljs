@@ -47,7 +47,7 @@ function_declaration
   = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ type ";" _ block:block ";" _ { return {'name': name, 'arguments': args, 'block': block, 'ret': true}; }
 
 argument_list_declaration
-  = first:argument_declaration? rest:("," _ argument_declaration)* { return [first].concat(nth(rest, 2)); }
+  = first:argument_declaration? rest:(";" _ argument_declaration)* { return [first].concat(nth(rest, 2)); }
 
 argument_declaration
   = first:identifier rest:("," _ identifier)* ":" _ type { return [first].concat(nth(rest, 2)); }
