@@ -47,6 +47,14 @@ function emit_statements(statements) {
 }
 
 function emit_node(node) {
+  var c = node.declarations.constants;
+  if (c) {
+    for (var i = 0; i < c.length; i++)
+    {
+      emit_raw('const ' + c[i].name + ' = ' + c[i].value + ';');
+    }
+  }
+
   var v = node.declarations.variables;
   if (v) {
     for (var i = 0; i < v.length; i++)

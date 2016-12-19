@@ -35,7 +35,7 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [x] Procedures
 - [x] Functions
 - [x] Variabes
-- [ ] Constants
+- [x] Constants
 - [ ] Type aliases
 - [ ] Records
 - [x] Arrays
