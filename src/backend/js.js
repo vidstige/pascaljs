@@ -46,6 +46,10 @@ function emit_statements(statements) {
   }
 }
 
+function argument_list(ast_arguments) {
+  return ast_arguments.map(function (arg) { return arg.name; }).join(', ');
+}
+
 function emit_node(node) {
   var c = node.declarations.constants;
   if (c) {
@@ -70,7 +74,7 @@ function emit_node(node) {
   if (p) {
     for (var i = 0; i < p.length; i++)
     {
-      emit_raw("function " + p[i].name + "(" + p[i].arguments.join(',') + ") {");
+      emit_raw("function " + p[i].name + "(" + argument_list(p[i].arguments) + ") {");
       if (p[i].ret) {
         emit_raw('var ' + p[i].name + ";");
         emit_node(p[i].block);

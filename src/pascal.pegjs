@@ -50,10 +50,10 @@ function_declaration
   = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ type ";" _ block:block ";" _ { return {'name': name, 'arguments': args, 'block': block, 'ret': true}; }
 
 argument_list_declaration
-  = first:argument_declaration? rest:(";" _ argument_declaration)* { return [first].concat(nth(rest, 2)); }
+  = first:argument_declaration? rest:(";" _ argument_declaration)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }
 
 argument_declaration
-  = first:identifier rest:("," _ identifier)* ":" _ type { return [first].concat(nth(rest, 2)); }
+  = first:identifier rest:("," _ identifier)* ":" _ t:type { return [{'name': first, 'type': t}].concat(rest.map(function (r) { return {'name': r[2], 'type': t}; })); }
 
 // types
 types
@@ -83,7 +83,7 @@ var
 // TODO: Allow const ints for bounds
 // TODO: Return proper ast for array types.
 type "type"
-  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ identifier { return 'array' ;}
+  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ identifier { return 'array'; }
   / identifier
 
 // STATEMENTS
