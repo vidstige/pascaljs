@@ -25,6 +25,9 @@
     }
     return results.join(' ');
   }
+  function flatten(arrays) {
+    return Array.prototype.concat.apply([], arrays);
+  }
 }
 
 program

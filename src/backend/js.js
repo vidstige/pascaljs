@@ -70,12 +70,7 @@ function emit_node(node) {
   if (p) {
     for (var i = 0; i < p.length; i++)
     {
-      var flat_args = [];
-      for (var j = 0; j < p[i].arguments.length; j++) {
-        flat_args = flat_args.concat(p[i].arguments[j]);
-      }
-
-      emit_raw("function " + p[i].name + "(" + flat_args.join(',') + ") {");
+      emit_raw("function " + p[i].name + "(" + p[i].arguments.join(',') + ") {");
       if (p[i].ret) {
         emit_raw('var ' + p[i].name + ";");
         emit_node(p[i].block);
