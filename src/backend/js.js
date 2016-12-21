@@ -64,7 +64,7 @@ function emit_node(node) {
     for (var i = 0; i < v.length; i++)
     {
       var initializer = v[i].type.array ? '[]' : 'null';
-      emit_raw("var " + v[i].name + " = " + initializer + ";");
+      emit_raw("var " + v[i].name + " = " + initializer + ";" + " // " + JSON.stringify(v[i].type));
     }
   }
   var p = node.declarations.procedures;
