@@ -7,5 +7,7 @@ type
 var
     p: TPoint;
 begin
-    WriteLn('x: ', p, ', y: ', p);
+    p.x := 1;
+    p.y := 2;
+    WriteLn('x: ', p.x, ', y: ', p.y);
 end.

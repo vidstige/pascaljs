@@ -11,7 +11,8 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 
 ### Statements
 - [ ] Comments
-- [x] Invoke procedures
+- [x] Invoke Procedures
+- [ ] `var` parameters
 - [x] Compound
 - [x] `for`
 - [x] `if`
@@ -38,10 +39,12 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [x] Variabes
 - [x] Constants
 - [x] Type aliases
-- [ ] Records
+- [x] Records
 - [x] Arrays
 - [ ] Mix declaration order
 - [ ] Real
+- [x] Type checking
+- [ ] Nested arrays/records
 
 ### Assembler
 - [ ] Parse keywords
