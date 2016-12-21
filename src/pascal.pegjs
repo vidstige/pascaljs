@@ -29,8 +29,10 @@
     return Array.prototype.concat.apply([], arrays);
   }
   function createBuiltins() {
-    var built_in = {'array': false};
-    return {'String': built_in, 'Boolean': built_in, 'Integer': built_in};
+    function createBuiltin(name) {
+        return {'kind': 'builtin', 'name': name}
+    }
+    return {'String': createBuiltin('string'), 'Boolean': createBuiltin('boolean'), 'Integer': createBuiltin('integer')};
   }
   var types = createBuiltins();
 
@@ -98,7 +100,8 @@ var
 // TODO: Allow const ints for bounds
 // TODO: Return proper ast for array types.
 type "type"
-  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'array': true, 'range': {'low': low, 'high': high}, 'of': findType(of)}; }
+  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': findType(of)}; }
+  / "record" _ argument_list_declaration _ "end" { return {'kind': 'record', 'parts': null}; }
   / type_name:identifier { return findType(type_name); }
 
 // STATEMENTS
