@@ -101,7 +101,7 @@ var
 // TODO: Return proper ast for array types.
 type "type"
   = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': findType(of)}; }
-  / "record" _ parts:argument_list_declaration _ "end" { return {'kind': 'record', 'parts': parts}; }
+  / "record" _ members:argument_list_declaration _ "end" { return {'kind': 'record', 'members': members}; }
   / type_name:identifier { return findType(type_name); }
 
 // STATEMENTS
@@ -114,7 +114,6 @@ compound
 assignment
   = lvalue:lvalue _ ":=" _ value:expression { return {'statement': 'assignment', 'to': lvalue, 'from': value}; }
 
-// TODO: Unify "part" "member" terminology
 lvalue
   = variable:identifier _ "[" _ indexer:expression _ "]" { return {'variable': variable, 'indexer': indexer}; }
   / variable:identifier "." member:identifier { return {'variable': variable, 'member': member}; }
