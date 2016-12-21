@@ -17,7 +17,7 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [x] `for`
 - [x] `if`
 - [x] assignment
-- [ ] `while`
+- [x] `while`
 - [ ] `repeat`
 - [ ] `with`
 - [ ] Recursive calls
