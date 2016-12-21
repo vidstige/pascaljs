@@ -106,7 +106,7 @@ type "type"
 
 // STATEMENTS
 statement
-  = compound / procedure_call / assignment / if_stmt / for
+  = compound / procedure_call / assignment / if_stmt / for / while
 
 compound
   = "begin" _ stmts:statements _ "end" { return {'statement': 'compound', 'statements': stmts}; }
@@ -134,6 +134,9 @@ if_stmt
 for
   = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return {'statement': 'for', 'variable': variable, 'start': start, 'stop': stop, 'direction': direction, 'do': stmt }; }
 
+while
+  = "while" _ condition:expression _ "do" _ stmt:statement { return {'statement': 'while', 'condition': condition, 'do': stmt }; }
+
 // HERE GOES EXPRESSIONS
 function_call "function call"
   = func:identifier _ "(" args:argument_list ")"  { return func + '(' + args + ')'; }
@@ -150,7 +153,7 @@ comparision
   / a:or_expr _ "<" _ b:or_expr { return [a, '<', b].join(''); }
 
 or_expr 
-  = first:and_expr rest:( _ ("or" / "+") _ and_expr )* { return buildList(first, rest, 3,  1, {'or': '||'}); }
+  = first:and_expr rest:( _ ("or" / "+" / "-") _ and_expr )* { return buildList(first, rest, 3,  1, {'or': '||'}); }
 
 and_expr
   = first:base_expr rest:( _ ("and" / "*" / "/" / "div" / "mod") _ base_expr )* { return buildList(first, rest, 3,  1, {'and': '&&', 'div': '/', 'mod': '%'}); }
