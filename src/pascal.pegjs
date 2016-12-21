@@ -153,7 +153,7 @@ or_expr
   = first:and_expr rest:( _ ("or" / "+") _ and_expr )* { return buildList(first, rest, 3,  1, {'or': '||'}); }
 
 and_expr
-  = first:base_expr rest:( _ ("and" / "*") _ base_expr )* { return buildList(first, rest, 3,  1, {'and': '&&'}); }
+  = first:base_expr rest:( _ ("and" / "*" / "/" / "div" / "mod") _ base_expr )* { return buildList(first, rest, 3,  1, {'and': '&&', 'div': '/', 'mod': '%'}); }
 
 base_expr
   = primary / "(" _ expression _ ")" { return text(); }
