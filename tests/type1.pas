@@ -1,6 +1,6 @@
 program type;
 type
-  TAngle = byte;
+  TAngle = Integer;
 var
   alpha: TAngle;
 begin
