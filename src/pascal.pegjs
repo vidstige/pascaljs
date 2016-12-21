@@ -83,7 +83,7 @@ var
 // TODO: Allow const ints for bounds
 // TODO: Return proper ast for array types.
 type "type"
-  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ identifier { return 'array'; }
+  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'array': true, 'range': {'low': low, 'high': high, 'of': of}}; }
   / identifier
 
 // STATEMENTS

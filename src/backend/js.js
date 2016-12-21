@@ -63,11 +63,8 @@ function emit_node(node) {
   if (v) {
     for (var i = 0; i < v.length; i++)
     {
-      if (v[i].type == "array") {
-        emit_raw("var " + v[i].name + " = [];");
-      } else {
-        emit_raw("var " + v[i].name + ";");
-      }
+      var initializer = v[i].type.array ? '[]' : 'null';
+      emit_raw("var " + v[i].name + " = " + initializer + ";");
     }
   }
   var p = node.declarations.procedures;
