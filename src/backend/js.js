@@ -27,8 +27,12 @@ function emit_statement(stmt) {
       var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
       var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + stmt.stop ) : (stmt.variable+'>='+stmt.stop);
       emit_raw('for (' + stmt.variable + '=' + stmt.start + '; ' + stop_criterion + '; ' + update + ') {');
-      emit_statement(stmt.do)
+      emit_statement(stmt.do);
       emit_raw('}');
+      break;
+    case 'while':
+      emit_raw('while (' + stmt.condition + ")");
+      emit_statement(stmt.do);
       break;
     case 'if':
       emit_raw('if (' + stmt.condition + ')');
