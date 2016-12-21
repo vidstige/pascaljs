@@ -63,7 +63,7 @@ function emit_node(node) {
   if (v) {
     for (var i = 0; i < v.length; i++)
     {
-      var initializer = v[i].type.array ? '[]' : 'null';
+      var initializer = v[i].type.kind == 'array' ? '[]' : 'null';
       emit_raw("var " + v[i].name + " = " + initializer + ";" + " // " + JSON.stringify(v[i].type));
     }
   }
