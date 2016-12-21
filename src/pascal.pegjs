@@ -101,7 +101,7 @@ var
 // TODO: Return proper ast for array types.
 type "type"
   = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': findType(of)}; }
-  / "record" _ argument_list_declaration _ "end" { return {'kind': 'record', 'parts': null}; }
+  / "record" _ parts:argument_list_declaration _ "end" { return {'kind': 'record', 'parts': parts}; }
   / type_name:identifier { return findType(type_name); }
 
 // STATEMENTS
@@ -114,8 +114,10 @@ compound
 assignment
   = lvalue:lvalue _ ":=" _ value:expression { return {'statement': 'assignment', 'to': lvalue, 'from': value}; }
 
+// TODO: Unify "part" "member" terminology
 lvalue
   = variable:identifier _ "[" _ indexer:expression _ "]" { return {'variable': variable, 'indexer': indexer}; }
+  / variable:identifier "." member:identifier { return {'variable': variable, 'member': member}; }
   / variable:identifier { return {'variable': variable}; }
 
 procedure_call
@@ -133,7 +135,7 @@ if_stmt
 for
   = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return {'statement': 'for', 'variable': variable, 'start': start, 'stop': stop, 'direction': direction, 'do': stmt }; }
 
-// HERE GOES EXPRESSOINS
+// HERE GOES EXPRESSIONS
 function_call "function call"
   = func:identifier _ "(" args:argument_list ")"  { return func + '(' + args + ')'; }
 
@@ -158,10 +160,13 @@ base_expr
   = primary / "(" _ expression _ ")" { return text(); }
 
 primary
-  = function_call / array_lookup / literal / variable
+  = function_call / array_access / record_access / literal / variable
 
-array_lookup
+array_access
   = variable _ "[" _ expression _ "]" { return text(); }
+
+record_access
+  = variable "." identifier { return text(); }
 
 variable "variable"
   = variable_name:identifier 

@@ -17,6 +17,8 @@ function emit_statement(stmt) {
     case 'assignment':
       if (stmt.to.indexer) {
         emit_raw(stmt.to.variable + "[" + stmt.to.indexer + "]" + ' = '  + stmt.from + ";");
+      } else if (stmt.to.member) {
+        emit_raw(stmt.to.variable + "." + stmt.to.member + ' = '  + stmt.from + ";");
       } else {
         emit_raw(stmt.to.variable + ' = '  + stmt.from + ";");
       }
@@ -51,6 +53,16 @@ function argument_list(ast_arguments) {
 }
 
 function emit_node(node) {
+  function initializer_for(type) {
+    if (type.kind == 'array') {
+      return '[]';
+    }
+    if (type.kind == 'record') {
+      return '{}';
+    }
+    return 'null';
+  }
+
   var c = node.declarations.constants;
   if (c) {
     for (var i = 0; i < c.length; i++)
@@ -63,7 +75,7 @@ function emit_node(node) {
   if (v) {
     for (var i = 0; i < v.length; i++)
     {
-      var initializer = v[i].type.kind == 'array' ? '[]' : 'null';
+      var initializer = initializer_for(v[i].type);
       emit_raw("var " + v[i].name + " = " + initializer + ";" + " // " + JSON.stringify(v[i].type));
     }
   }
