@@ -1,7 +1,7 @@
 program Sample;
 
-var a: BOOLEAN;
-    b: BOOLEAN;
+var a: Boolean;
+    b: Boolean;
     
 begin
   a := true;

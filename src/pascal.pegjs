@@ -28,6 +28,21 @@
   function flatten(arrays) {
     return Array.prototype.concat.apply([], arrays);
   }
+  function createBuiltins() {
+    var built_in = {'array': false};
+    return {'String': built_in, 'Boolean': built_in, 'Integer': built_in};
+  }
+  var types = createBuiltins();
+
+  function createAlias(alias, type) {
+    types[alias] = type;
+  }
+  function findType(type_name) {
+    if (type_name in types) {
+      return types[type_name];
+    }
+    error('Unknown type "' + type_name + '"');
+  }
 }
 
 program
@@ -60,7 +75,7 @@ types
   = "type" _ types:type_declaration+ { return types; }
 
 type_declaration
-  = alias:identifier _ "=" _ type_name:type _ ";" _ { return {'alias': alias, 'type_name': type_name}; } 
+  = alias:identifier _ "=" _ the_type:type _ ";" _ { createAlias(alias, the_type); return {'alias': alias, 'type': the_type}; } 
 
 
 // CONSTANTS
@@ -83,8 +98,8 @@ var
 // TODO: Allow const ints for bounds
 // TODO: Return proper ast for array types.
 type "type"
-  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'array': true, 'range': {'low': low, 'high': high, 'of': of}}; }
-  / identifier
+  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'array': true, 'range': {'low': low, 'high': high}, 'of': findType(of)}; }
+  / type_name:identifier { return findType(type_name); }
 
 // STATEMENTS
 statement
