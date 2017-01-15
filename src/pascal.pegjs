@@ -102,6 +102,7 @@ var
 type "type"
   = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': findType(of)}; }
   / "record" _ members:argument_list_declaration _ "end" { return {'kind': 'record', 'members': members}; }
+  / "^" type
   / type_name:identifier { return findType(type_name); }
 
 // STATEMENTS
@@ -162,7 +163,16 @@ base_expr
   = primary / "(" _ expression _ ")" { return text(); }
 
 primary
-  = function_call / array_access / record_access / literal / variable
+  = function_call / pointer_to / deref / array_access / record_access / literal / variable
+
+// POINTERS GOES HERE
+// Pointers are solved by storing the variable name the pointer is pointing to, then js `eval` is used
+// to "derefrence" the pointer.
+pointer_to
+  = "@" v:identifier { return JSON.stringify({'pointer': v}); }
+
+deref
+  = ptr:identifier "^" { return "eval(" + ptr + "['pointer']" + ")"; }
 
 array_access
   = variable _ "[" _ expression _ "]" { return text(); }
