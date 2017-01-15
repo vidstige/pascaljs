@@ -31,7 +31,7 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [x] Arithmetic operators
 - [x] Comparisions
 - [x] Function calls
-- [ ] Pointers
+- [x] Pointers
 
 ### Declarations
 - [x] Procedures
