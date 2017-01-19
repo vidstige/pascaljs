@@ -12,4 +12,9 @@ procedure wrap(angle: TAngle);
 
 implementation
 
+procedure wrap(angle: TAngle);
+begin
+    WriteLn(angle);
+end;
+
 end.
