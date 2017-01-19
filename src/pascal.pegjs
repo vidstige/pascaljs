@@ -54,7 +54,7 @@ program
   = "program" _ name:identifier ";" _ root:block "."  { return {'program': root, 'name': name}; }
 
 unit
-  = "unit" _ name:identifier ";" _ "interface" _ "implementation" _ "end" "." { return {'unit': null, 'name': name}; }
+  = "unit" _ name:identifier ";" _ "interface" _ interface_part _ "implementation" _ "end" "." { return {'unit': null, 'name': name}; }
 
 block
   = d:declarations "begin" _ s:statements _ "end" { return {'declarations': d, 'statements': s}; }
@@ -64,6 +64,10 @@ statements
 
 declarations 
   = types:types? constants:constants? procs:(procedure_declaration / function_declaration)* vars:vars? { return {'types': types, 'constants': constants, 'procedures': procs, 'variables': vars}; }
+
+// UNIT PARTS
+interface_part
+  = types:types? constants:constants? procs:(procedure_header / function_header)* { return {'types': types, 'constants': constants, 'procedures': procs}; }
 
 // PROCEDURE DECLARATION
 procedure_header
