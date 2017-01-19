@@ -100,9 +100,9 @@ var
 // TODO: Allow const ints for bounds
 // TODO: Return proper ast for array types.
 type "type"
-  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:identifier { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': findType(of)}; }
+  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:type { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': of}; }
   / "record" _ members:argument_list_declaration _ "end" { return {'kind': 'record', 'members': members}; }
-  / "^" type
+  / "^" to:type { return {'kind': 'pointer', 'to': to}}
   / type_name:identifier { return findType(type_name); }
 
 // STATEMENTS
