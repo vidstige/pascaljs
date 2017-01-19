@@ -103,11 +103,13 @@ function emit_node(node) {
 }
 
 function emit(ast) {
-  // emit std unit
-  emit_raw('// Genrated by pascaljs');
-  emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }");
+  if (ast.program) {
+    // emit std unit
+    emit_raw('// Genrated by pascaljs');
+    emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
 
-  emit_node(ast);
+    emit_node(ast.program);
+  }
 }
 
 module.exports = {
