@@ -66,11 +66,17 @@ declarations
   = types:types? constants:constants? procs:(procedure_declaration / function_declaration)* vars:vars? { return {'types': types, 'constants': constants, 'procedures': procs, 'variables': vars}; }
 
 // PROCEDURE DECLARATION
+procedure_header
+  = "procedure" _ name:identifier "(" args:argument_list_declaration ")" _ ";" { return {'name': name, 'args': args}; }
+
 procedure_declaration 
-  = "procedure" _ name:identifier "(" args:argument_list_declaration ")" _ ";" _ block:block ";" _ { return {'name': name, 'arguments': args, 'block': block, 'ret': false}; }
+  = head:procedure_header _ block:block ";" _ { return {'name': head.name, 'arguments': head.args, 'block': block, 'ret': false}; }
+
+function_header
+  = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" { return {'name': name, 'args': args}; }
 
 function_declaration 
-  = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ type ";" _ block:block ";" _ { return {'name': name, 'arguments': args, 'block': block, 'ret': true}; }
+  = head:function_header _ block:block ";" _ { return {'name': head.name, 'arguments': head.args, 'block': block, 'ret': true}; }
 
 argument_list_declaration
   = first:argument_declaration? rest:(";" _ argument_declaration)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }
