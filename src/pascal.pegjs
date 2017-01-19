@@ -47,8 +47,14 @@
   }
 }
 
+start =
+  program / unit
+
 program
-  = "program" _ identifier ";" _ root:block "."  { return root; }
+  = "program" _ name:identifier ";" _ root:block "."  { return {'program': root, 'name': name}; }
+
+unit
+  = "unit" _ name:identifier ";" _ "interface" _ "implementation" _ "end" "." { return {'unit': null, 'name': name}; }
 
 block
   = d:declarations "begin" _ s:statements _ "end" { return {'declarations': d, 'statements': s}; }
