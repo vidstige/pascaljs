@@ -73,10 +73,10 @@ procedure_declaration
   = head:procedure_header _ block:block ";" _ { return {'name': head.name, 'arguments': head.args, 'block': block, 'ret': false}; }
 
 function_header
-  = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" { return {'name': name, 'args': args}; }
+  = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" { return {'name': name, 'args': args, 'return_type': return_type}; }
 
 function_declaration 
-  = head:function_header _ block:block ";" _ { return {'name': head.name, 'arguments': head.args, 'block': block, 'ret': true}; }
+  = head:function_header _ block:block ";" _ { return {'name': head.name, 'arguments': head.args, 'block': block, 'return_type': head.return_type}; }
 
 argument_list_declaration
   = first:argument_declaration? rest:(";" _ argument_declaration)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }

@@ -80,7 +80,7 @@ function emit_node(node) {
     for (var i = 0; i < v.length; i++)
     {
       var initializer = initializer_for(v[i].type);
-      emit_raw("var " + v[i].name + " = " + initializer + ";" + " // " + JSON.stringify(v[i].type));
+      emit_raw("var " + v[i].name + " = " + initializer + ";" + " // " + v[i].type.name);
     }
   }
   var p = node.declarations.procedures;
@@ -88,8 +88,8 @@ function emit_node(node) {
     for (var i = 0; i < p.length; i++)
     {
       emit_raw("function " + p[i].name + "(" + argument_list(p[i].arguments) + ") {");
-      if (p[i].ret) {
-        emit_raw('var ' + p[i].name + ";");
+      if (p[i].return_type) {
+        emit_raw('var ' + p[i].name + ";" + " // returns " + p[i].return_type.name);
         emit_node(p[i].block);
         emit_raw('return ' + p[i].name + ";");
       } else {
