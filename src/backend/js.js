@@ -114,15 +114,31 @@ function emit_node(node) {
   emit_statements(node.statements);
 }
 
+function emit_notice() {
+  emit_raw("// Genrated by pascaljs. https://github.com/vidstige/pascaljs");
+}
+
 function emit(ast) {
   if (ast.program) {
     // emit std unit
-    emit_raw('// Genrated by pascaljs');
+    emit_notice();
     emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
 
     emit_node(ast.program);
   } else if (ast.unit) {
-    emit_raw("// UNIT");
+    emit_notice();
+    
+    emit_constants(ast.unit.interface.constants);
+    emit_variables(ast.unit.interface.variables);
+    //emit_procedures(ast.unit.interface.procedures);
+      
+    emit_constants(ast.unit.implementation.constants);
+    emit_variables(ast.unit.implementation.variables);
+    emit_procedures(ast.unit.implementation.procedures);
+
+
+  } else {
+    throw "Unknown AST: " + ast;
   }
 }
 
