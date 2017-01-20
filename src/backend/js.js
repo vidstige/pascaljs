@@ -56,26 +56,29 @@ function argument_list(ast_arguments) {
   return ast_arguments.map(function (arg) { return arg.name; }).join(', ');
 }
 
-function emit_node(node) {
-  function initializer_for(type) {
-    if (type.kind == 'array') {
-      return '[]';
-    }
-    if (type.kind == 'record') {
-      return '{}';
-    }
-    return 'null';
+function initializer_for(type) {
+  if (type.kind == 'array') {
+    return '[]';
   }
+  if (type.kind == 'record') {
+    return '{}';
+  }
+  return 'null';
+}
 
-  var c = node.declarations.constants;
+function emit_constants(constants) {
+  var c = constants;
   if (c) {
     for (var i = 0; i < c.length; i++)
     {
       emit_raw('const ' + c[i].name + ' = ' + c[i].value + ';');
     }
   }
+}
 
-  var v = node.declarations.variables;
+function emit_variables(variables)
+{
+  var v = variables;
   if (v) {
     for (var i = 0; i < v.length; i++)
     {
@@ -83,7 +86,10 @@ function emit_node(node) {
       emit_raw("var " + v[i].name + " = " + initializer + ";" + " // " + v[i].type.name);
     }
   }
-  var p = node.declarations.procedures;
+}
+
+function emit_procedures(procedures) {
+  var p = procedures;
   if (p) {
     for (var i = 0; i < p.length; i++)
     {
@@ -98,6 +104,12 @@ function emit_node(node) {
       emit_raw("}");
     }
   }
+}
+
+function emit_node(node) {
+  emit_constants(node.declarations.constants);
+  emit_variables(node.declarations.variables);
+  emit_procedures(node.declarations.procedures);
 
   emit_statements(node.statements);
 }
@@ -109,6 +121,8 @@ function emit(ast) {
     emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
 
     emit_node(ast.program);
+  } else if (ast.unit) {
+    emit_raw("// UNIT");
   }
 }
 
