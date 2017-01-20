@@ -41,7 +41,7 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [x] Type aliases
 - [x] Records
 - [x] Arrays
-- [ ] Mix declaration order
+- [x] Mix declaration order
 - [ ] Real
 - [x] Type checking
 - [ ] Nested arrays/records

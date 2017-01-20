@@ -88,29 +88,53 @@ function emit_variables(variables)
   }
 }
 
+function emit_procedure(p) {
+  emit_raw("function " + p.procedure + "(" + argument_list(p.arguments) + ") {");
+  emit_node(p.block);
+  emit_raw("}");
+}
+
+function emit_function(f) {
+  emit_raw("function " + f.function + "(" + argument_list(f.arguments) + ") {");
+
+  emit_raw('var ' + f.function + ";" + " // returns " + f.return_type.name);
+  emit_node(f.block);
+  emit_raw('return ' + f.function + ";");
+
+  emit_raw("}");
+}
+
 function emit_procedures(procedures) {
   var p = procedures;
   if (p) {
     for (var i = 0; i < p.length; i++)
     {
-      emit_raw("function " + p[i].name + "(" + argument_list(p[i].arguments) + ") {");
-      if (p[i].return_type) {
-        emit_raw('var ' + p[i].name + ";" + " // returns " + p[i].return_type.name);
-        emit_node(p[i].block);
-        emit_raw('return ' + p[i].name + ";");
-      } else {
-        emit_node(p[i].block);
-      }
-      emit_raw("}");
+      emit_procedure(p[i]);
+    }
+  }
+}
+
+function emit_declarations(declarations) {
+  //emit_raw('// ' + JSON.stringify(node.declarations));
+  for (var i = 0; i < declarations.length; i++) {
+    var d = declarations[i];
+    if (d.procedure) {
+      emit_procedure(d);
+    }
+    if (d.function) {
+      emit_function(d);
+    }
+    if (d.constants) {
+      emit_constants(d.constants);
+    }
+    if (d.vars) {
+      emit_variables(d.vars);
     }
   }
 }
 
 function emit_node(node) {
-  emit_constants(node.declarations.constants);
-  emit_variables(node.declarations.variables);
-  emit_procedures(node.declarations.procedures);
-
+  emit_declarations(node.declarations);
   emit_statements(node.statements);
 }
 
@@ -128,14 +152,11 @@ function emit(ast) {
   } else if (ast.unit) {
     emit_notice();
     
-    emit_constants(ast.unit.interface.constants);
-    emit_variables(ast.unit.interface.variables);
-    //emit_procedures(ast.unit.interface.procedures);
-      
-    emit_constants(ast.unit.implementation.constants);
-    emit_variables(ast.unit.implementation.variables);
-    emit_procedures(ast.unit.implementation.procedures);
+    emit_declarations(ast.unit.interface);
+    emit_declarations(ast.unit.implementation);
 
+    // TODO: Export interface functions, constants, and vars
+    // TODO: ...and double check functions are also in implementation
 
   } else {
     throw "Unknown AST: " + ast;

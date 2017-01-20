@@ -63,11 +63,15 @@ statements
   = all:(statement ";" _)*  { return nth(all, 0); }
 
 declarations 
-  = types:types? constants:constants? procs:(procedure_declaration / function_declaration)* vars:vars? { return {'types': types, 'constants': constants, 'procedures': procs, 'variables': vars}; }
+  = declaration_part*
+
+declaration_part
+  = types / constants / vars / procedure_declaration / function_declaration
 
 // UNIT PARTS
 interface_part
-  = types:types? constants:constants? procs:(procedure_header / function_header)* { return {'types': types, 'constants': constants, 'procedures': procs}; }
+//  = types:types? constants:constants? procs:(procedure_header / function_header)* { return {'types': types, 'constants': constants, 'procedures': procs}; }
+  = (types / constants / vars / procedure_header / function_header)*
 
 implementation_part
   = declarations
@@ -77,13 +81,13 @@ procedure_header
   = "procedure" _ name:identifier "(" args:argument_list_declaration ")" _ ";" { return {'name': name, 'args': args}; }
 
 procedure_declaration 
-  = head:procedure_header _ block:block ";" _ { return {'name': head.name, 'arguments': head.args, 'block': block, 'ret': false}; }
+  = head:procedure_header _ block:block ";" _ { return {'procedure': head.name, 'arguments': head.args, 'block': block, 'ret': false}; }
 
 function_header
   = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" { return {'name': name, 'args': args, 'return_type': return_type}; }
 
 function_declaration 
-  = head:function_header _ block:block ";" _ { return {'name': head.name, 'arguments': head.args, 'block': block, 'return_type': head.return_type}; }
+  = head:function_header _ block:block ";" _ { return {'function': head.name, 'arguments': head.args, 'block': block, 'return_type': head.return_type}; }
 
 argument_list_declaration
   = first:argument_declaration? rest:(";" _ argument_declaration)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }
@@ -93,7 +97,7 @@ argument_declaration
 
 // types
 types
-  = "type" _ types:type_declaration+ { return types; }
+  = "type" _ types:type_declaration+ { return {'types': types}; }
 
 type_declaration
   = alias:identifier _ "=" _ the_type:type _ ";" _ { createAlias(alias, the_type); return {'alias': alias, 'type': the_type}; } 
@@ -101,7 +105,7 @@ type_declaration
 
 // CONSTANTS
 constants
-  = "const" _ constants:constant+ { return constants; }
+  = "const" _ constants:constant+ { return {'constants': constants}; }
 
 // TODO: Use constexpr instead of literal
 constant
@@ -110,7 +114,7 @@ constant
 
 // VARIABLE DECLARATION
 vars
-  = "var" _ vars:var+ { return vars; } 
+  = "var" _ vars:var+ { return {'vars': vars}; } 
   
 // TODO: Reuse argument_declaration
 var
