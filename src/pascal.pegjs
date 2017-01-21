@@ -226,5 +226,11 @@ boolean_literal
 integer_literal
   = [0-9]+ { return text(); }
 
+comment
+  = "{" comment_character* "}"
+
+comment_character
+  = !("}") .
+
 _ "whitespace"
-  = [ \t\n\r]* { return '' }
+  = (comment / [ \t\n\r])* { return null; }
