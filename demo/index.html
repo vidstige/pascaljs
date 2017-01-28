@@ -1,12 +1,7 @@
 <html>
 
 <head>
-<script>
-function run() {
-    // Run and compile
-    document.getElementById('output').innerText = "error"
-}
-</script>
+    <script src="js/bundle.js"></script>
 </head>
 
 <body>
@@ -17,9 +12,9 @@ function run() {
 <textarea id="program" rows="30" cols="80">
 program x;
 begin
-end.
-</textarea>
-<button onclick="run()">Run</button>
+  WriteLn('Hello World!');
+end.</textarea>
+<button onclick="demo.run('program', 'output')">Run</button>
 <pre id="output">
 </pre>
 </div>
