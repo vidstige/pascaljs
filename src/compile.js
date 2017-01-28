@@ -12,7 +12,8 @@ var pascal_source = fs.readFileSync(filepath, "utf8");
 
 try {
     var ast = parser.parse(pascal_source);
-    emitter.emit(ast);
+    var e = new emitter.Emitter();
+    e.emit(ast);
 } catch (e) {
     
     if (e instanceof(parser.SyntaxError)) {
