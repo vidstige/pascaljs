@@ -8,6 +8,11 @@
   },
   "author": "Samuel Carlsson <samuel.carlsson@gmail.com>",
   "license": "Apache-2.0",
+  "repository" :
+  {
+    "type" : "git",
+    "url" : "https://github.com/vidstige/pascaljs/demo"
+  },
   "devDependencies": {
     "webpack": "^1.14.0",
     "webpack-dev-server": "^1.16.2"
