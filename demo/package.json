@@ -4,6 +4,7 @@
   "description": "Simple demo page for pascaljs",
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0",
+    "copy": "mkdir -p js/ && cp -r ../src/ js/",
     "start": "./node_modules/.bin/http-server"
   },
   "author": "Samuel Carlsson <samuel.carlsson@gmail.com>",
