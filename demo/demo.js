@@ -1,5 +1,5 @@
-var parser = require('./js/pascal.js')
-var emitter = require('./js/backend/js.js');
+var parser = require('../src/pascal.js')
+var emitter = require('../src/backend/js.js');
 
 function run(source_id, output_id) {
     console.log('hi there!');

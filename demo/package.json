@@ -4,16 +4,13 @@
   "description": "Simple demo page for pascaljs",
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0",
-    "copy": "mkdir -p js/ && cp -r ../src/ js/",
-    "buildit": "./node_modules/.bin/browserify demo.js > js/bundle.js",
-    "start": "./node_modules/.bin/http-server"
+    "start": "./node_modules/.bin/webpack-dev-server --progress --colors"
   },
   "author": "Samuel Carlsson <samuel.carlsson@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "http-server": "^0.9.0"
+    "webpack": "^1.14.0",
+    "webpack-dev-server": "^1.16.2"
   },
-  "dependencies": {
-    "browserify": "^14.0.0"
-  }
+  "dependencies": {}
 }
