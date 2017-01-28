@@ -2,3 +2,4 @@ node_modules/
 src/pascal.js
 src/emit.js
 build/
+!docs/build/
