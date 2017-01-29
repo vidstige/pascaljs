@@ -10,7 +10,7 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [ ] Units
 
 ### Statements
-- [ ] Comments
+- [x] Comments
 - [x] Invoke Procedures
 - [ ] `var` parameters
 - [x] Compound
@@ -42,7 +42,7 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 - [x] Records
 - [x] Arrays
 - [x] Mix declaration order
-- [ ] Real
+- [x] Real
 - [x] Type checking
 - [ ] Nested arrays/records
 

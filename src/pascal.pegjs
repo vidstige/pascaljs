@@ -35,6 +35,7 @@
     return {
       'String': createBuiltin('string'), 
       'Boolean': createBuiltin('boolean'),
+      'Real': createBuiltin('real'),
       'Integer': createBuiltin('integer'),
       'Byte': createBuiltin('byte'),
       'Word': createBuiltin('word')};
@@ -217,7 +218,7 @@ identifier "identifier"
 // LITERALS
 
 literal "literal"
-  = string_literal / boolean_literal / integer_literal
+  = string_literal / boolean_literal / real_literal / integer_literal
 
 string_literal
   = "'" string_character* "'"  { return text(); }
@@ -230,6 +231,9 @@ boolean_literal
 
 integer_literal
   = [0-9]+ { return text(); }
+
+real_literal
+  = [0-9]+ "." [0-9]+ { return text; }
 
 comment
   = "{" comment_character* "}"
