@@ -32,7 +32,12 @@
     function createBuiltin(name) {
         return {'kind': 'builtin', 'name': name}
     }
-    return {'String': createBuiltin('string'), 'Boolean': createBuiltin('boolean'), 'Integer': createBuiltin('integer')};
+    return {
+      'String': createBuiltin('string'), 
+      'Boolean': createBuiltin('boolean'),
+      'Integer': createBuiltin('integer'),
+      'Byte': createBuiltin('byte'),
+      'Word': createBuiltin('word')};
   }
   var types = createBuiltins();
 
