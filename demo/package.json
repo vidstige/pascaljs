@@ -5,6 +5,7 @@
   "scripts": {
     "test": "echo \"Warning: no test specified\" && exit 0",
     "start": "./node_modules/.bin/webpack-dev-server --progress --colors",
+    "build": "./node_modules/.bin/webpack demo.js build/bundle.js",
     "update-docs": "cp -r index.html build ../docs/"
   },
   "author": "Samuel Carlsson <samuel.carlsson@gmail.com>",
