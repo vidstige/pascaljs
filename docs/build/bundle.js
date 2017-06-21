@@ -54,17 +54,13 @@
 	var parser = __webpack_require__(2)
 	var emitter = __webpack_require__(3);
 
-	function run(source_id, output_id) {
-	    console.log('hi there!');
-	    console.log('id: #' + source_id);
-	    console.log('id: #' + output_id);
-
+	function run(pascal_source, output_id) {
+	  try {
 	    var object_code = "";
 	    var raw_emit = function (line) {
 	        object_code += line + "\n";
 	    };
 
-	    var pascal_source = document.getElementById(source_id).value;
 	    var ast = parser.parse(pascal_source);
 	    var e = new emitter.Emitter(raw_emit);
 	    e.emit(ast);
@@ -82,6 +78,15 @@
 	    console.log = original;
 
 	    document.getElementById(output_id).innerHTML = output;
+	  } catch (e) {
+	    if (e instanceof(parser.SyntaxError)) {
+	      // specific error
+	        document.getElementById(output_id).innerHTML = e.message;
+	        console.error(e);
+	    } else {
+	      throw e;
+	    }
+	  }
 	}
 
 	window.demo = { run: run }
