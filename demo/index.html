@@ -29,6 +29,7 @@ end.</div>
     var editor = ace.edit("editor");
     editor.setTheme("ace/theme/monokai");
     editor.getSession().setMode("ace/mode/pascal");
+    editor.setFontSize(24);
 
     function runit() {
       var pascal_source = editor.getSession().getValue();
