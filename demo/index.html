@@ -1,24 +1,40 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="en">
 <head>
+    <meta charset="utf-8">
+    <title>pascaljs</title>
+    <style>
+        #editor {
+                width: 640px;height:480px;
+            }
+    </style>
     <script src="build/bundle.js"></script>
 </head>
 
 <body>
 <h1>pascaljs</h1>
-<p>Pascal compiler in js that emits js. Can be used
-to compile and/or run pascal programs in the browser.</p>
+  <p>Pascal compiler in js that emits js. Can be used
+  to compile and/or run pascal programs in the browser.</p>
 
-<div>
-<textarea id="program" rows="30" cols="80">
-program x;
+  <div>
+    <div id="editor">program x;
 begin
   WriteLn('Hello World!');
-end.</textarea>
-<button onclick="demo.run('program', 'output')">Run</button>
-<pre id="output">
-</pre>
-</div>
+end.</div>
+    <button onclick="runit()">Run</button>
+    <pre id="output"></pre>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
+  <script>
+    var editor = ace.edit("editor");
+    editor.setTheme("ace/theme/monokai");
+    editor.getSession().setMode("ace/mode/pascal");
+
+    function runit() {
+      var pascal_source = editor.getSession().getValue();
+      demo.run(pascal_source, 'output');
+    }
+  </script>
 </body>
 
 </html>

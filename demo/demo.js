@@ -1,14 +1,13 @@
 var parser = require('../src/pascal.js')
 var emitter = require('../src/backend/js.js');
 
-function run(source_id, output_id) {
+function run(pascal_source, output_id) {
   try {
     var object_code = "";
     var raw_emit = function (line) {
         object_code += line + "\n";
     };
 
-    var pascal_source = document.getElementById(source_id).value;
     var ast = parser.parse(pascal_source);
     var e = new emitter.Emitter(raw_emit);
     e.emit(ast);
