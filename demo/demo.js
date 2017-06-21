@@ -2,10 +2,7 @@ var parser = require('../src/pascal.js')
 var emitter = require('../src/backend/js.js');
 
 function run(source_id, output_id) {
-    console.log('hi there!');
-    console.log('id: #' + source_id);
-    console.log('id: #' + output_id);
-
+  try {
     var object_code = "";
     var raw_emit = function (line) {
         object_code += line + "\n";
@@ -29,6 +26,15 @@ function run(source_id, output_id) {
     console.log = original;
 
     document.getElementById(output_id).innerHTML = output;
+  } catch (e) {
+    if (e instanceof(parser.SyntaxError)) {
+      // specific error
+        document.getElementById(output_id).innerHTML = e.message;
+        console.error(e);
+    } else {
+      throw e;
+    }
+  }
 }
 
 window.demo = { run: run }
