@@ -1,0 +1,41 @@
+#editor {
+  width: 640px;height:480px;
+}
+
+body {
+  font-family: 'Montserrat', sans-serif;
+  background-color: #477890;
+  color: white;
+}
+
+.title-description-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.site-description {
+  text-align: center;
+  width: 600px;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.editor button {
+  margin-top: 10px;
+  color: white;
+  background: rgba(0,0,0,0);
+  border: solid 3px white;
+  height: 40px;
+  width: 70px;
+  font-size: 1em;
+}
+
+.editor button:hover {
+  border-color: #D1E6FC;
+  color: #D1E6FC;
+}
