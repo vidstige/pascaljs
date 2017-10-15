@@ -3,20 +3,19 @@
 <head>
     <meta charset="utf-8">
     <title>pascaljs</title>
-    <style>
-        #editor {
-                width: 640px;height:480px;
-            }
-    </style>
+    <link rel="stylesheet" href="main.css"></link>
+    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
     <script src="build/bundle.js"></script>
 </head>
 
 <body>
-<h1>pascaljs</h1>
-  <p>Pascal compiler in js that emits js. Can be used
-  to compile and/or run pascal programs in the browser.</p>
+  <div class="title-description-container">
+    <h1 class="site-title">pascaljs</h1>
+    <p class="site-description">Pascal compiler in js that emits js. Can be used
+    to compile and/or run pascal programs in the browser.</p>
+  </div>
 
-  <div>
+  <div class="editor">
     <div id="editor">program x;
 begin
   WriteLn('Hello World!');
