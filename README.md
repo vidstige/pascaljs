@@ -6,6 +6,9 @@
 Pascal parser in js. The goal is to be able to run simple Turbo Pascal demos
 made in the 90s that depend on asm, but otherwise very simple pascal.
 
+## Example
+[https://vidstige.github.io/pascaljs/](https://vidstige.github.io/pascaljs/)
+
 ## Features
 - [x] Programs
 - [ ] Units
