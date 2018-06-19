@@ -27,8 +27,11 @@ function run(pascal_source, output_id) {
     document.getElementById(output_id).innerHTML = output;
   } catch (e) {
     if (e instanceof(parser.SyntaxError)) {
-      // specific error
-        document.getElementById(output_id).innerHTML = e.message;
+        // specific error
+        const element = document.getElementById(output_id);
+        element.innerHTML = e.message;
+        element.classList += "error";
+
         console.error(e);
     } else {
       throw e;
