@@ -21,17 +21,18 @@ function run(pascal_source, output_id) {
 
     // Run js object code
     eval(object_code);
-
     console.log = original;
 
-    document.getElementById(output_id).innerHTML = output;
+    const element = document.getElementById(output_id);
+    element.classList.remove("error");
+    console.log(output);
+    element.innerHTML = output;
   } catch (e) {
     if (e instanceof(parser.SyntaxError)) {
         // specific error
         const element = document.getElementById(output_id);
         element.innerHTML = e.message;
-        element.classList += "error";
-
+        element.classList.add("error");
         console.error(e);
     } else {
       throw e;

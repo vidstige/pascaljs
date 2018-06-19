@@ -1,26 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>pascaljs</title>
-    <link rel="stylesheet" href="main.css"></link>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-    <script src="build/bundle.js"></script>
+  <meta charset="utf-8">
+  <title>pascaljs</title>
+  <link rel="stylesheet" href="main.css"></link>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="build/bundle.js"></script>
 </head>
 
 <body>
-  <h1>pascaljs</h1>
-  <p>Pascal compiler in javascript! Try it out right now in your browser.</p>
+  <div class="header">
+    <h1>pascaljs</h1>
+    <p>Pascal compiler in javascript! Try it out right now in your browser.</p>
+  </div>
   <div class="content">
     <div class="column">
-      <div id="editor">program x;
+      <div id="editor">program hello;
 begin
   WriteLn('Hello World!');
 end.</div>
       <button onclick="runit()">Run</button>
     </div>
     <div class="column">
-      <pre id="output"></pre>
+      <p id="output"></p>
     </div>
   </div>
 
