@@ -1,41 +1,61 @@
-#editor {
-  width: 640px;height:480px;
-}
-
 body {
   font-family: 'Montserrat', sans-serif;
-  background-color: #477890;
-  color: white;
+  font-size: 24px;
+  color: #272822;
+  background: #eee;
 }
 
-.title-description-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.site-description {
+.header {
   text-align: center;
-  width: 600px;
 }
 
-.editor {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+#editor {
+  width: 100%;
+  height: 480px;
 }
 
-.editor button {
-  margin-top: 10px;
-  color: white;
-  background: rgba(0,0,0,0);
-  border: solid 3px white;
+button {
+  margin-top: 8px;
+  background: white;
+  border: solid 3px #272822;
   height: 40px;
-  width: 70px;
-  font-size: 1em;
+  width: 100%;
+  font-size: 24px;
 }
 
-.editor button:hover {
-  border-color: #D1E6FC;
-  color: #D1E6FC;
+button:hover {
+  background: #ddd;
+  border-color: black;
+}
+
+#output {
+  margin-top: 0px;
+  margin-left: 8px;
+  padding: 0px 8px;
+  font-family: monospace;
+  color: #ddd;
+  background: #272822;
+  height: 480px;
+}
+
+.error {
+  color: red;
+}
+
+.column {
+  float: left;
+  width: 50%;
+}
+
+/* Clear floats after the columns */
+.content:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+
+/* Clear floats after the columns */
+.content:after {
+  display: flex;
 }

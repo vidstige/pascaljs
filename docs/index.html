@@ -1,28 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>pascaljs</title>
-    <link rel="stylesheet" href="main.css"></link>
-    <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-    <script src="build/bundle.js"></script>
+  <meta charset="utf-8">
+  <title>pascaljs</title>
+  <link rel="stylesheet" href="main.css"></link>
+  <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
+  <script src="build/bundle.js"></script>
 </head>
 
 <body>
-  <div class="title-description-container">
-    <h1 class="site-title">pascaljs</h1>
-    <p class="site-description">Pascal compiler in js that emits js. Can be used
-    to compile and/or run pascal programs in the browser.</p>
+  <div class="header">
+    <h1>pascaljs</h1>
+    <p>Pascal compiler in javascript! Try it out right now in your browser.</p>
   </div>
-
-  <div class="editor">
-    <div id="editor">program x;
+  <div class="content">
+    <div class="column">
+      <div id="editor">program hello;
 begin
   WriteLn('Hello World!');
 end.</div>
-    <button onclick="runit()">Run</button>
-    <pre id="output"></pre>
+      <button onclick="runit()">Run</button>
+    </div>
+    <div class="column">
+      <p id="output"></p>
+    </div>
   </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
   <script>
     var editor = ace.edit("editor");
