@@ -4,3 +4,5 @@ src/pascal.js
 src/emit.js
 build/
 !docs/build/
+
+yarn-error.log
