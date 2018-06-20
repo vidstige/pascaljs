@@ -213,7 +213,7 @@ variable "variable"
   = variable_name:identifier 
 
 identifier "identifier"
-   = [A-Za-z][A-Za-z0-9]* { return text(); } 
+   = [A-Za-z][A-Za-z0-9_]* { return text(); } 
 
 // LITERALS
 
