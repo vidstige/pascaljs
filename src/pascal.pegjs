@@ -115,8 +115,13 @@ constants
 
 // TODO: Use constexpr instead of literal
 constant
-  = constant_name:identifier _ "=" _ value:literal _ ";" _ { return {'name':constant_name, 'value': value}; }
+  = constant_name:identifier _ "=" _ value:const_literal _ ";" _ { return {'name':constant_name, 'value': value, 'type': null}; }
+  / constant_name:identifier _ ":" _ type:type _ "=" _ value:const_literal _ ";" _ { return {'name':constant_name, 'value': value, 'type': type}; }
 
+// TODO: argument_list should be const
+const_literal
+  = literal
+  / "(" _ values:argument_list _ ")" { return '[' + values + ']'; }
 
 // VARIABLE DECLARATION
 vars
