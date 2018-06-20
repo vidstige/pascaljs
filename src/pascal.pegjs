@@ -236,6 +236,7 @@ boolean_literal
 
 integer_literal
   = [0-9]+ { return text(); }
+  / "$" hex:[0-9A-Fa-f]+ { return parseInt(hex, 16); }
 
 real_literal
   = [0-9]+ "." [0-9]+ { return text; }
