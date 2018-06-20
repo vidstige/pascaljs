@@ -38,7 +38,8 @@
       'Real': createBuiltin('real'),
       'Integer': createBuiltin('integer'),
       'Byte': createBuiltin('byte'),
-      'Word': createBuiltin('word')};
+      'Word': createBuiltin('word'),
+      'Procedure': createBuiltin('procedure')};
   }
   var types = createBuiltins();
 
@@ -135,7 +136,7 @@ var
 // TODO: Return proper ast for array types.
 type "type"
   = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:type { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': of}; }
-  / "record" _ members:argument_list_declaration _ "end" { return {'kind': 'record', 'members': members}; }
+  / "record" _ members:argument_list_declaration _ ";"? _ "end" { return {'kind': 'record', 'members': members}; }
   / "^" to:type { return {'kind': 'pointer', 'to': to}}
   / type_name:identifier { return findType(type_name); }
 
