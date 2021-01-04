@@ -6,6 +6,26 @@
 Pascal parser in js. The goal is to be able to run simple Turbo Pascal demos
 made in the 90s that depend on asm, but otherwise very simple pascal.
 
+The generated js output is very sensible and lean. For example the following pascal program:
+
+```pascal
+program v;
+var
+    x: Integer;
+begin
+    x := 'y';
+    WriteLn('x is ', x);
+end.
+```
+Is compiled to just 
+```js
+// Genrated by pascaljs. https://github.com/vidstige/pascaljs
+function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }
+var x = null; // integer
+x = 'y';
+WriteLn('x is ', x);
+```
+
 ## Example
 [https://vidstige.github.io/pascaljs/](https://vidstige.github.io/pascaljs/)
 
