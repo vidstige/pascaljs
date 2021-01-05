@@ -79,6 +79,7 @@ WriteLn('x is ', x);
 ### Assembler
 
 - [ ] Parse keywords
+- [ ] Adress variables and pointers
 - [ ] mov
 - [ ] int
 - [ ] loop
@@ -87,6 +88,9 @@ WriteLn('x is ', x);
 ### Stanard unit
 
 - [x] `WriteLn´
+- [ ] Arithmetic
+- [ ] File  I/O
+- [ ] In separate file
 
 ### Graphics subsystem
 
