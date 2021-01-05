@@ -17,7 +17,9 @@ begin
     WriteLn('x is ', x);
 end.
 ```
-Is compiled to just 
+
+Is compiled to just
+
 ```js
 // Genrated by pascaljs. https://github.com/vidstige/pascaljs
 function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }
@@ -30,10 +32,12 @@ WriteLn('x is ', x);
 [https://vidstige.github.io/pascaljs/](https://vidstige.github.io/pascaljs/)
 
 ## Features
+
 - [x] Programs
 - [ ] Units
 
 ### Statements
+
 - [x] Comments
 - [x] Invoke Procedures
 - [ ] `var` parameters
@@ -47,6 +51,7 @@ WriteLn('x is ', x);
 - [ ] Recursive calls
 
 ### Expressions
+
 - [x] Integer literals
 - [x] String literals
 - [x] Variables
@@ -58,6 +63,7 @@ WriteLn('x is ', x);
 - [x] Pointers
 
 ### Declarations
+
 - [x] Procedures
 - [x] Functions
 - [x] Variabes
@@ -71,6 +77,7 @@ WriteLn('x is ', x);
 - [ ] Nested arrays/records
 
 ### Assembler
+
 - [ ] Parse keywords
 - [ ] mov
 - [ ] int
@@ -78,12 +85,13 @@ WriteLn('x is ', x);
 - [ ] Conditionals
 
 ### Stanard unit
+
 - [x] `WriteLn´
 
 ### Graphics subsystem
+
 - [ ] VGA emulation
 - [ ] Palette
-
 
 ## Author
 Samuel Carlsson <samuel.carlsson@gmail.com>
