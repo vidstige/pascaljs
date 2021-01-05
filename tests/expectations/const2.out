@@ -1,6 +1,6 @@
 I = 123
 S = hej
 A[1] = 16
-HEX10 = 1
-HEX3f = 3
-HEX3F = 3
+HEX10 = 16
+HEX3f = 63
+HEX3F = 63
