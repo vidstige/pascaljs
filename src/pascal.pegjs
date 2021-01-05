@@ -236,8 +236,8 @@ boolean_literal
   = "true" / "false"
 
 integer_literal
-  = [0-9]+ { return text(); }
-  / "$" hex:[0-9A-Fa-f]+ { return parseInt(hex, 16); }
+  = "$" [0-9A-Fa-f]+ { return parseInt(text().substring(1), 16); }
+  / [0-9]+ { return text(); }
 
 real_literal
   = [0-9]+ "." [0-9]+ { return text; }
