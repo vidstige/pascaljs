@@ -6,28 +6,6 @@ function fancy {
         echo "✗ " $2
     fi 
 }
-
-fails=0
-for obj in $1; do
-  tmp="${obj/build/tests/expectations}"
-  expected="${tmp%.js}.out"
-  test_name=`basename ${obj%.js}`
-  if [ -f $obj ]; then
-    if [ -f $expected ]; then
-      actual=$(mktemp /tmp/pascaljs.XXXXXX)
-      node $obj > $actual && diff $actual $expected
-      success=$?
-      rm "$actual"
-    else
-      node $obj > /dev/null
-      success=$?
-    fi
-  else
-    success=255
-  fi
-  if [ ! $success -eq 0 ]; then
-    ((fails++))
-  fi
-  fancy $success $test_name
-done
-exit $fails
+diff $1 $2  
+success=$?
+fancy "$success" $(basename -s .out $1)
