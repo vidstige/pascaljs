@@ -1,8 +1,7 @@
 pegjs = node_modules/pegjs/bin/pegjs
 
 SRCS=$(wildcard tests/*.pas)
-OBJS=$(patsubst tests/%.pas,build/%.js,$(SRCS))
-EXPECTED=$(patsubst tests/%.pas,tests/expectations/%.out,$(SRCS))
+VERIFICATION=$(patsubst tests/%.pas,verify/%,$(SRCS))
 
 $(pegjs):
 	npm install
@@ -10,8 +9,14 @@ $(pegjs):
 src/pascal.js: src/pascal.pegjs $(pegjs)
 	$(pegjs) src/pascal.pegjs
 
-test: $(OBJS) $(EXPECTED) verify.sh
-	@./verify.sh "$(OBJS)"
+tests/actual/%.out: build/%.js
+	@mkdir -p tests/actual/
+	node $< > $@
+
+verify/%: tests/actual/%.out tests/expectations/%.out
+	@./verify.sh $^
+
+test: $(VERIFICATION)
 
 build/%.js: tests/%.pas src/compile.js src/pascal.js src/backend/js.js
 	@mkdir -p build/
@@ -20,4 +25,6 @@ build/%.js: tests/%.pas src/compile.js src/pascal.js src/backend/js.js
 clean:
 	rm -rf src/pascal.js build/
 
-.PHONY: test clean
+.PRECIOUS: tests/actual/%.out
+
+.PHONY: test clean verify/

@@ -2,7 +2,7 @@ node_modules/
 npm-debug.log
 src/pascal.js
 src/emit.js
-build/
-!docs/build/
+/build/
+/tests/actual/
 
 yarn-error.log
