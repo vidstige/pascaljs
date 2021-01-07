@@ -14,13 +14,7 @@ function Emitter(emit_raw) {
         this.emit_raw(stmt.target + '(' + stmt.arguments.join(', ') + ');');
         break;
       case 'assignment':
-        if (stmt.to.indexer) {
-          this.emit_raw(stmt.to.variable + "[" + stmt.to.indexer + "]" + ' = '  + stmt.from + ";");
-        } else if (stmt.to.member) {
-          this.emit_raw(stmt.to.variable + "." + stmt.to.member + ' = '  + stmt.from + ";");
-        } else {
-          this.emit_raw(stmt.to.variable + ' = '  + stmt.from + ";");
-        }
+        this.emit_raw(stmt.to + " = " + stmt.from + "");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
@@ -57,6 +51,12 @@ function Emitter(emit_raw) {
 
   this.initializer_for = function(type) {
     if (type.kind == 'array') {
+      if (type.of.kind == "record") {
+        // TODO: Just always use high. Don't compress arrays starting
+        // after 0.
+        const n = type.range.high;
+        return "Array(" + n + ").fill({})";
+      }
       return '[]';
     }
     if (type.kind == 'record') {
