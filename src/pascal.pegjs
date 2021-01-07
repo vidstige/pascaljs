@@ -151,9 +151,19 @@ assignment
   = lvalue:lvalue _ ":=" _ value:expression { return {'statement': 'assignment', 'to': lvalue, 'from': value}; }
 
 lvalue
+  = field_access { return text(); }
+
+field_access
+  = (array_access "." lvalue) / array_access { return text(); }
+
+array_access
+  = (identifier "[" expression "]") / identifier { return text(); }
+
+/*
   = variable:identifier _ "[" _ indexer:expression _ "]" { return {'variable': variable, 'indexer': indexer}; }
   / variable:identifier "." member:identifier { return {'variable': variable, 'member': member}; }
   / variable:identifier { return {'variable': variable}; }
+*/
 
 procedure_call
   = procedure:identifier _ "(" args:argument_list ")"  { return {'statement': 'call', 'target': procedure, 'arguments': args}; }
@@ -195,10 +205,10 @@ and_expr
   = first:base_expr rest:( _ ("and" / "*" / "/" / "div" / "mod") _ base_expr )* { return buildList(first, rest, 3,  1, {'and': '&&', 'div': '/', 'mod': '%'}); }
 
 base_expr
-  = primary / "(" _ expression _ ")" { return text(); }
+  = primary / "(" _ expression _ ")"
 
 primary
-  = function_call / pointer_to / deref / array_access / record_access / literal / variable
+  = function_call / pointer_to / deref / literal / field_access {return text();}
 
 // POINTERS GOES HERE
 // Pointers are solved by storing the variable name the pointer is pointing to, then js `eval` is used
@@ -208,15 +218,6 @@ pointer_to
 
 deref
   = ptr:identifier "^" { return "eval(" + ptr + "['pointer']" + ")"; }
-
-array_access
-  = variable _ "[" _ expression _ "]" { return text(); }
-
-record_access
-  = variable "." identifier { return text(); }
-
-variable "variable"
-  = variable_name:identifier 
 
 identifier "identifier"
    = [A-Za-z][A-Za-z0-9_]* { return text(); } 
