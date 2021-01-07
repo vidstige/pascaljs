@@ -242,7 +242,7 @@ integer_literal
   / [0-9]+ { return text(); }
 
 real_literal
-  = [0-9]+ "." [0-9]+ { return text; }
+  = [0-9]+ "." [0-9]+ { return text(); }
 
 comment
   = "{" comment_character* "}"
