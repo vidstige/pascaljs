@@ -44,6 +44,7 @@
   var types = createBuiltins();
 
   function createAlias(alias, type) {
+    type.name = alias;
     types[alias] = type;
   }
   function findType(type_name) {
