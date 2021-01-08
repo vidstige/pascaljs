@@ -12,7 +12,7 @@ src/pascal.js: src/pascal.pegjs $(pegjs)
 tests/actual/%.out: build/%.js
 	@mkdir -p tests/actual/
 	node $< > $@ || rm $@
-	test -f $@
+	@test -f $@
 
 tests/expectations/%.out:
 
@@ -24,7 +24,7 @@ test: $(VERIFICATION)
 build/%.js: tests/%.pas src/compile.js src/pascal.js src/backend/js.js
 	@mkdir -p build/
 	node src/compile.js $< > $@ || rm $@
-	test -f $@
+	@test -f $@
 
 clean:
 	rm -rf src/pascal.js build/
