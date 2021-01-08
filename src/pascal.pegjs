@@ -78,7 +78,6 @@ declaration_part
 
 // UNIT PARTS
 interface_part
-//  = types:types? constants:constants? procs:(procedure_header / function_header)* { return {'types': types, 'constants': constants, 'procedures': procs}; }
   = (types / constants / vars / procedure_header / function_header)*
 
 implementation_part
@@ -86,13 +85,13 @@ implementation_part
 
 // PROCEDURE DECLARATION
 procedure_header
-  = "procedure" _ name:identifier "(" args:argument_list_declaration ")" _ ";" { return {'name': name, 'args': args}; }
+  = "procedure" _ name:identifier "(" args:argument_list_declaration ")" _ ";" _ { return {'name': name, 'args': args}; }
 
 procedure_declaration 
   = head:procedure_header _ block:block ";" _ { return {'procedure': head.name, 'arguments': head.args, 'block': block, 'ret': false}; }
 
 function_header
-  = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" { return {'name': name, 'args': args, 'return_type': return_type}; }
+  = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" _ { return {'name': name, 'args': args, 'return_type': return_type}; }
 
 function_declaration 
   = head:function_header _ block:block ";" _ { return {'function': head.name, 'arguments': head.args, 'block': block, 'return_type': head.return_type}; }

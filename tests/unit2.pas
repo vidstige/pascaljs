@@ -6,15 +6,22 @@ type
   TAngle = Integer;
 
 const
-    A = 17;
+    REVOLUTION = 256;
 
-procedure wrap(angle: TAngle);
+
+function NormalizeAngle(angle: TAngle): TAngle;
+function AngleDifference(a: TAngle; b: TAngle): TAngle;
 
 implementation
 
-procedure wrap(angle: TAngle);
+function NormalizeAngle(angle: TAngle): TAngle;
 begin
-    WriteLn(angle);
+    NormalizeAngle := angle mod REVOLUTION;
+end;
+
+function AngleDifference(a: TAngle; b: TAngle): TAngle;
+begin
+    AngleDifference := b - a;
 end;
 
 end.
