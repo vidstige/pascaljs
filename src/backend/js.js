@@ -1,5 +1,29 @@
 // Emits js from pascal ast    
 
+function initializer_for(type) {
+  if (type.kind == 'array') {
+    if (type.of.kind == "record") {
+      // TODO: Just always use high. Don't compress arrays starting
+      // after 0.
+      const n = type.range.high;
+      return 'Array(' + n + ').fill(' + initializer_for(type.of) + ')';
+    }
+    return '[]';
+  }
+  if (type.kind == 'record') {
+    var tmp = [];
+    for (var i = 0; i < type.members.length; i++) {
+      const member = type.members[i];
+      const initializer = initializer_for(member.type);
+      if (initializer !== null) {
+        tmp.push('"' + member.name + '": ' + initializer);
+      }
+    }
+    return '{' + tmp.join(', ') + '}';
+  }
+  return null;
+}
+
 function Emitter(emit_raw) {
   this.emit_raw = emit_raw || console.log;
   
@@ -49,30 +73,6 @@ function Emitter(emit_raw) {
     return ast_arguments.map(function (arg) { return arg.name; }).join(', ');
   }
 
-  this.initializer_for = function(type) {
-    if (type.kind == 'array') {
-      if (type.of.kind == "record") {
-        // TODO: Just always use high. Don't compress arrays starting
-        // after 0.
-        const n = type.range.high;
-        return 'Array(' + n + ').fill(' + this.initializer_for(type.of) + ')';
-      }
-      return '[]';
-    }
-    if (type.kind == 'record') {
-      var tmp = [];
-      for (var i = 0; i < type.members.length; i++) {
-        const member = type.members[i];
-        const initializer = this.initializer_for(member.type);
-        if (initializer !== null) {
-          tmp.push('"' + member.name + '": ' + initializer);
-        }
-      }
-      return '{' + tmp.join(', ') + '}';
-    }
-    return null;
-  }
-
   this.emit_constants = function(constants) {
     var c = constants;
     if (c) {
@@ -83,14 +83,16 @@ function Emitter(emit_raw) {
     }
   }
 
-  this.emit_variables = function(variables)
-  {
-    var v = variables;
-    if (v) {
-      for (var i = 0; i < v.length; i++)
+  this.emit_variable = function(variable) {
+    var initializer = initializer_for(variable.type);
+    this.emit_raw("var " + variable.name + " = " + initializer + ";" + " // " + variable.type.name);
+  }
+
+  this.emit_variables = function(variables) {
+    if (variables) {
+      for (var i = 0; i < variables.length; i++)
       {
-        var initializer = this.initializer_for(v[i].type);
-        this.emit_raw("var " + v[i].name + " = " + initializer + ";" + " // " + v[i].type.name);
+        this.emit_variable(variables[i])
       }
     }
   }
