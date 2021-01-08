@@ -74,7 +74,7 @@ WriteLn('x is ', x);
 - [x] Mix declaration order
 - [x] Real
 - [x] Type checking
-- [ ] Nested arrays/records
+- [x] Nested arrays/records
 
 ### Assembler
 
