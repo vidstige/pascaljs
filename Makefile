@@ -15,6 +15,7 @@ tests/actual/%.out: build/%.js
 	@test -f $@
 
 tests/expectations/%.out:
+	touch $@
 
 verify/%: tests/actual/%.out tests/expectations/%.out
 	@./verify.sh $^
