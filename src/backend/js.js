@@ -55,14 +55,23 @@ function Emitter(emit_raw) {
         // TODO: Just always use high. Don't compress arrays starting
         // after 0.
         const n = type.range.high;
-        return "Array(" + n + ").fill({})";
+        return 'Array(' + n + ').fill(' + this.initializer_for(type.of) + ')';
       }
       return '[]';
     }
     if (type.kind == 'record') {
-      return '{}';
+      var tmp = '{';
+      for (var i = 0; i < type.members.length; i++) {
+        const member = type.members[i];
+        const initializer = this.initializer_for(member.type);
+        if (initializer !== null) {
+          tmp += '"' + member.name + '": ' + initializer;
+        }
+      }
+      tmp += '}';
+      return tmp;
     }
-    return 'null';
+    return null;
   }
 
   this.emit_constants = function(constants) {
