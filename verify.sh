@@ -9,3 +9,4 @@ function fancy {
 diff $1 $2  
 success=$?
 fancy "$success" $(basename -s .out $1)
+exit $success
