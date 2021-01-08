@@ -38,7 +38,7 @@ function Emitter(emit_raw) {
         this.emit_raw(stmt.target + '(' + stmt.arguments.join(', ') + ');');
         break;
       case 'assignment':
-        this.emit_raw(stmt.to + " = " + stmt.from + "");
+        this.emit_raw(stmt.to + " = " + stmt.from + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
