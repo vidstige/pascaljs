@@ -1,7 +1,8 @@
 program array3;
 type
     TMAtrix3 = record
-        m: array[0..9] of Real;
+        m: array[0..8] of Real;
+        strides: array[0..2] of Integer;
     end;
 var
   matrix: TMAtrix3;

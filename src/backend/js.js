@@ -60,16 +60,15 @@ function Emitter(emit_raw) {
       return '[]';
     }
     if (type.kind == 'record') {
-      var tmp = '{';
+      var tmp = [];
       for (var i = 0; i < type.members.length; i++) {
         const member = type.members[i];
         const initializer = this.initializer_for(member.type);
         if (initializer !== null) {
-          tmp += '"' + member.name + '": ' + initializer;
+          tmp.push('"' + member.name + '": ' + initializer);
         }
       }
-      tmp += '}';
-      return tmp;
+      return '{' + tmp.join(', ') + '}';
     }
     return null;
   }
