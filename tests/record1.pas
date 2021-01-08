@@ -1,4 +1,4 @@
-programrecord1;
+program record1;
 type
     { trailing semi}
     TPoint = record

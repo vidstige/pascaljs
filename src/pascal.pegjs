@@ -59,10 +59,10 @@ start =
   program / unit
 
 program
-  = "program" _ name:identifier ";" _ root:block "."  { return {'program': root, 'name': name}; }
+  = "program" __ name:identifier ";" _ root:block "."  { return {'program': root, 'name': name}; }
 
 unit
-  = "unit" _ name:identifier ";" _ "interface" _ the_interface:interface_part _ "implementation" _ the_implementation:implementation_part _ "end" "." { return {'unit': {'interface': the_interface, 'implementation': the_implementation}, 'name': name}; }
+  = "unit" __ name:identifier ";" _ "interface" _ the_interface:interface_part _ "implementation" _ the_implementation:implementation_part _ "end" "." { return {'unit': {'interface': the_interface, 'implementation': the_implementation}, 'name': name}; }
 
 block
   = d:declarations "begin" _ s:statements _ "end" { return {'declarations': d, 'statements': s}; }
@@ -137,7 +137,7 @@ var
 // TODO: Return proper ast for array types.
 type "type"
   = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ of:type { return {'kind': 'array', 'range': {'low': low, 'high': high}, 'of': of}; }
-  / "record" _ members:argument_list_declaration _ ";"? _ "end" { return {'kind': 'record', 'members': members}; }
+  / "record" __ members:argument_list_declaration _ ";"? _ "end" { return {'kind': 'record', 'members': members}; }
   / "^" to:type { return {'kind': 'pointer', 'to': to}}
   / type_name:identifier { return findType(type_name); }
 
@@ -252,3 +252,6 @@ comment_character
 
 _ "whitespace"
   = (comment / [ \t\n\r])* { return null; }
+
+__ "whitespace"
+  = (comment / [ \t\n\r])+ { return null; }
