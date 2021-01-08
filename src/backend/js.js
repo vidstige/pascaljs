@@ -106,7 +106,7 @@ function Emitter(emit_raw) {
   this.emit_function = function(f) {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
 
-    this.emit_raw('var ' + f.function + ";" + " // returns " + f.return_type.name);
+    this.emit_variable({'name': f.function, 'type': f.return_type});
     this.emit_node(f.block);
     this.emit_raw('return ' + f.function + ";");
 
