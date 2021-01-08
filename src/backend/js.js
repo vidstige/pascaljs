@@ -150,6 +150,19 @@ function Emitter(emit_raw) {
   this.emit_notice = function() {
     this.emit_raw("// Genrated by pascaljs. https://github.com/vidstige/pascaljs");
   }
+  
+  this.emit_export = function(interface) {
+    // TODO: Export constants and vars
+    // TODO: Export types. As `_types` perhaps?
+    var tmp = [];
+    for (var i = 0; i < interface.length; i++) {
+      if (interface[i].name) { // callable
+        const name = interface[i].name;
+        tmp.push(name + ': ' + name);
+      }
+    }
+    this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
+  }
 
   this.emit = function(ast) {
     if (ast.program) {
@@ -164,9 +177,7 @@ function Emitter(emit_raw) {
       this.emit_declarations(ast.unit.interface);
       this.emit_declarations(ast.unit.implementation);
 
-      // TODO: Export interface functions, constants, and vars
-      // TODO: ...and double check functions are also in implementation
-
+      this.emit_export(ast.unit.interface);
     } else {
       throw "Unknown AST: " + ast;
     }
