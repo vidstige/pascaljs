@@ -8,7 +8,6 @@ type
 const
     REVOLUTION = 256;
 
-
 function NormalizeAngle(angle: TAngle): TAngle;
 function AngleDifference(a: TAngle; b: TAngle): TAngle;
 
