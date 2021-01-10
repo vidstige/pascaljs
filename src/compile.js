@@ -1,5 +1,4 @@
 var fs = require('fs');
-var path = require('path');
 var parser = require('./pascal.js')
 var emitter = require('./backend/js.js');
 
@@ -12,7 +11,7 @@ var pascal_source = fs.readFileSync(filepath, "utf8");
 
 try {
     var ast = parser.parse(pascal_source);
-    var e = new emitter.Emitter();
+    var e = new emitter.Emitter({});
     e.emit(ast);
 } catch (e) {
     

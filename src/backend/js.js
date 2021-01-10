@@ -24,8 +24,16 @@ function initializer_for(type) {
   return null;
 }
 
-function Emitter(emit_raw) {
-  this.emit_raw = emit_raw || console.log;
+function Emitter(config) {
+  this.emit_raw = config.emit_raw || console.log;
+  
+  const unit_search_paths = config.unit_search_paths || [];
+  for (var i = 0; i < unit_search_paths.length; i++) {
+    const path = unit_search_paths[i];
+    if (!(path in module.paths)) {
+      module.paths.push(path);
+    }
+  }
   
   this.emit_statement = function(stmt) {
     switch (stmt.statement) {

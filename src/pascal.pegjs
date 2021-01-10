@@ -53,8 +53,6 @@
     }
     error('Unknown type "' + type_name + '"');
   }
-  function import_units(unit_names) {
-  }
 }
 
 start =
@@ -67,7 +65,7 @@ unit
   = "unit" __ name:identifier ";" _ "interface" _ the_interface:interface_part _ "implementation" _ the_implementation:implementation_part _ "end" "." { return {'unit': {'interface': the_interface, 'implementation': the_implementation}, 'name': name}; }
 
 uses
-  = "uses" _ first:identifier rest:("," _ identifier)* ";" _ { return import_units([first].concat(nth(rest, 2))); }
+  = "uses" _ first:identifier rest:("," _ identifier)* ";" _ { return {'uses': [first].concat(nth(rest, 2))}; }
 
 block
   = d:declarations "begin" _ s:statements _ "end" { return {'declarations': d, 'statements': s}; }
