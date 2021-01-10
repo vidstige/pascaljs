@@ -10,6 +10,7 @@ const
 
 function NormalizeAngle(angle: TAngle): TAngle;
 function AngleDifference(a: TAngle; b: TAngle): TAngle;
+procedure DisplayAngle(a: TAngle);
 
 implementation
 
@@ -21,6 +22,11 @@ end;
 function AngleDifference(a: TAngle; b: TAngle): TAngle;
 begin
     AngleDifference := b - a;
+end;
+
+procedure DisplayAngle(a: TAngle);
+begin
+    WriteLn(a);
 end;
 
 end.
