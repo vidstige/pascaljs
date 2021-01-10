@@ -11,7 +11,7 @@ src/pascal.js: src/pascal.pegjs $(pegjs)
 
 tests/actual/%.out: build/%.js
 	@mkdir -p tests/actual/
-	node $< > $@ || rm $@
+	NODE_PATH=build/ node $< > $@ || rm $@
 	@test -f $@
 
 tests/expectations/%.out:

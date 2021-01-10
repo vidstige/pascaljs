@@ -11,10 +11,9 @@ var pascal_source = fs.readFileSync(filepath, "utf8");
 
 try {
     var ast = parser.parse(pascal_source);
-    var e = new emitter.Emitter({});
+    var e = new emitter.Emitter({unit_search_paths: ['build']});
     e.emit(ast);
 } catch (e) {
-    
     if (e instanceof(parser.SyntaxError)) {
         console.error(e.message);
         var location = e.location;

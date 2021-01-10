@@ -26,7 +26,8 @@ function initializer_for(type) {
 
 function Emitter(config) {
   this.emit_raw = config.emit_raw || console.log;
-  
+  const _symbol_map = {};
+
   const unit_search_paths = config.unit_search_paths || [];
   for (var i = 0; i < unit_search_paths.length; i++) {
     const path = unit_search_paths[i];
@@ -35,6 +36,13 @@ function Emitter(config) {
     }
   }
   
+  function symbol(identifier) {
+    if (identifier in _symbol_map) {
+      return _symbol_map[identifier];
+    }
+    return identifier;
+  }
+
   this.emit_statement = function(stmt) {
     switch (stmt.statement) {
       case 'compound':
@@ -43,7 +51,7 @@ function Emitter(config) {
         this.emit_raw('}');
         break;
       case 'call':
-        this.emit_raw(stmt.target + '(' + stmt.arguments.join(', ') + ');');
+        this.emit_raw(symbol(stmt.target) + '(' + stmt.arguments.join(', ') + ');');
         break;
       case 'assignment':
         this.emit_raw(stmt.to + " = " + stmt.from + ";");
@@ -131,10 +139,25 @@ function Emitter(config) {
     }
   }
 
+  this.emit_uses = function(node) {
+    for (var i = 0; i < node.length; i++) {
+      const unit_name = node[i];
+      const module = require(unit_name);
+      this.emit_raw("const " + unit_name + " = require('" + unit_name + "');");
+      for (var key in module) {
+        if (module.hasOwnProperty(key)) {
+          _symbol_map[key] = unit_name + '.' + key;
+        }
+      }
+    }
+  }
+
   this.emit_declarations = function(declarations) {
-    //emit_raw('// ' + JSON.stringify(node.declarations));
     for (var i = 0; i < declarations.length; i++) {
       var d = declarations[i];
+      if (d.uses) {
+        this.emit_uses(d.uses);
+      }
       if (d.procedure) {
         this.emit_procedure(d);
       }
@@ -181,7 +204,8 @@ function Emitter(config) {
       this.emit_node(ast.program);
     } else if (ast.unit) {
       this.emit_notice();
-      
+      this.emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
+  
       this.emit_declarations(ast.unit.interface);
       this.emit_declarations(ast.unit.implementation);
 

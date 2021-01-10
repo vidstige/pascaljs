@@ -59,7 +59,7 @@ start =
   program / unit
 
 program
-  = "program" __ name:identifier ";" _ uses? _ root:block "."  { return {'program': root, 'name': name}; }
+  = "program" __ name:identifier ";" _ root:block "."  { return {'program': root, 'name': name}; }
 
 unit
   = "unit" __ name:identifier ";" _ "interface" _ the_interface:interface_part _ "implementation" _ the_implementation:implementation_part _ "end" "." { return {'unit': {'interface': the_interface, 'implementation': the_implementation}, 'name': name}; }
@@ -77,11 +77,11 @@ declarations
   = declaration_part*
 
 declaration_part
-  = types / constants / vars / procedure_declaration / function_declaration
+  = uses / types / constants / vars / procedure_declaration / function_declaration
 
 // UNIT PARTS
 interface_part
-  = (types / constants / vars / procedure_header / function_header)*
+  = (uses / types / constants / vars / procedure_header / function_header)*
 
 implementation_part
   = declarations
