@@ -1,4 +1,13 @@
 {
+  function Binary(operator, lhs, rhs) {
+    this.operator = operator;
+    this.lhs = lhs;
+    this.rhs = rhs;
+  }
+  Binary.prototype.toString = function() {
+    return this.lhs + this.operator + this.rhs;
+  }
+
   // --- Utils -------
   function to_str(x) {
       return x.join('');
@@ -162,12 +171,6 @@ field_access
 array_access
   = (identifier "[" expression "]") / identifier { return text(); }
 
-/*
-  = variable:identifier _ "[" _ indexer:expression _ "]" { return {'variable': variable, 'indexer': indexer}; }
-  / variable:identifier "." member:identifier { return {'variable': variable, 'member': member}; }
-  / variable:identifier { return {'variable': variable}; }
-*/
-
 procedure_call
   = procedure:identifier _ "(" args:argument_list ")"  { return {'statement': 'call', 'target': procedure, 'arguments': args}; }
 
@@ -194,12 +197,12 @@ expression "expression"
   = comparision / or_expr
 
 comparision
-  = a:or_expr _ "=" _ b:or_expr { return [a, '==', b].join(''); }
-  / a:or_expr _ "<>" _ b:or_expr { return [a, '!=', b].join(''); }
-  / a:or_expr _ ">=" _ b:or_expr { return [a, '>=', b].join(''); }
-  / a:or_expr _ "<=" _ b:or_expr { return [a, '<=', b].join(''); }
-  / a:or_expr _ ">" _ b:or_expr { return [a, '>', b].join(''); }
-  / a:or_expr _ "<" _ b:or_expr { return [a, '<', b].join(''); }
+  = a:or_expr _ "=" _ b:or_expr { return new Binary('==', a, b); }
+  / a:or_expr _ "<>" _ b:or_expr { return new Binary('!=', a, b); }
+  / a:or_expr _ ">=" _ b:or_expr { return new Binary('>=', a, b); }
+  / a:or_expr _ "<=" _ b:or_expr { return new Binary('<=', a, b); }
+  / a:or_expr _ ">" _ b:or_expr { return new Binary('>', a, b); }
+  / a:or_expr _ "<" _ b:or_expr { return new Binary('<', a, b); }
 
 or_expr 
   = first:and_expr rest:( _ ("or" / "+" / "-") _ and_expr )* { return buildList(first, rest, 3,  1, {'or': '||'}); }
