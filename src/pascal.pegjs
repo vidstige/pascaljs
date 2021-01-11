@@ -6,7 +6,20 @@
   }
   Binary.prototype.toString = function() {
     return this.lhs + this.operator + this.rhs;
+  };
+  
+  function FunctionCall(name, args) {
+    this.name = name;
+    this.args = args;    
   }
+  FunctionCall.prototype.toString = function() {
+    return this.name + "(" + this.args + ")";
+  };
+
+  function Nested(expression) {
+    this.expression = expression;
+  }
+  Nested.prototype.toString = function() { return "(" + this.expression.toString() + ")"; }
 
   // --- Utils -------
   function to_str(x) {
@@ -191,7 +204,7 @@ while
 
 // HERE GOES EXPRESSIONS
 function_call "function call"
-  = func:identifier _ "(" args:argument_list ")"  { return func + '(' + args + ')'; }
+  = func:identifier _ "(" args:argument_list ")"  { return new FunctionCall(func, args); }
 
 expression "expression"
   = comparision / or_expr
@@ -211,7 +224,10 @@ and_expr
   = first:base_expr rest:( _ ("and" / "*" / "/" / "div" / "mod") _ base_expr )* { return buildList(first, rest, 3,  1, {'and': '&&', 'div': '/', 'mod': '%'}); }
 
 base_expr
-  = primary / "(" _ expression _ ")"
+  = primary / nested_expression
+
+nested_expression 
+  = "(" _ expression:expression _ ")" { return new Nested(expression); }
 
 primary
   = function_call / pointer_to / deref / literal / field_access {return text();}
