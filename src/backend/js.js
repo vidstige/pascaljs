@@ -59,9 +59,8 @@ function Emitter(config) {
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
         var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + stmt.stop ) : (stmt.variable+'>='+stmt.stop);
-        this.emit_raw('for (' + stmt.variable + '=' + stmt.start + '; ' + stop_criterion + '; ' + update + ') {');
+        this.emit_raw('for (' + stmt.variable + '=' + stmt.start + '; ' + stop_criterion + '; ' + update + ')');
         this.emit_statement(stmt.do);
-        this.emit_raw('}');
         break;
       case 'while':
         this.emit_raw('while (' + stmt.condition + ")");
