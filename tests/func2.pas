@@ -7,9 +7,6 @@ function IsEven(i: Integer): Integer;
 begin
     IsEven := (i mod 2) = 0;
 end;
-var
-  r: Boolean;
 begin
-  r := IsEven(Add(3, 4));
-  WriteLn('Is 3 + 4 even? ', r);
+  WriteLn('Is 3 + 4 even? ', IsEven(Add(3, 4)));
 end.

@@ -1,26 +1,4 @@
 {
-  function Binary(operator, lhs, rhs) {
-    this.operator = operator;
-    this.lhs = lhs;
-    this.rhs = rhs;
-  }
-  Binary.prototype.toString = function() {
-    return this.lhs + this.operator + this.rhs;
-  };
-  
-  function FunctionCall(name, args) {
-    this.name = name;
-    this.args = args;    
-  }
-  FunctionCall.prototype.toString = function() {
-    return this.name + "(" + this.args + ")";
-  };
-
-  function Nested(expression) {
-    this.expression = expression;
-  }
-  Nested.prototype.toString = function() { return "(" + this.expression.toString() + ")"; }
-
   // --- Utils -------
   function to_str(x) {
       return x.join('');
@@ -204,33 +182,42 @@ while
 
 // HERE GOES EXPRESSIONS
 function_call "function call"
-  = func:identifier _ "(" args:argument_list ")"  { return new FunctionCall(func, args); }
+  = func:identifier _ "(" args:argument_list ")"  { return {expression: 'call', func: func, args: args}; }
 
 expression "expression"
   = comparision / or_expr
 
 comparision
-  = a:or_expr _ "=" _ b:or_expr { return new Binary('==', a, b); }
-  / a:or_expr _ "<>" _ b:or_expr { return new Binary('!=', a, b); }
-  / a:or_expr _ ">=" _ b:or_expr { return new Binary('>=', a, b); }
-  / a:or_expr _ "<=" _ b:or_expr { return new Binary('<=', a, b); }
-  / a:or_expr _ ">" _ b:or_expr { return new Binary('>', a, b); }
-  / a:or_expr _ "<" _ b:or_expr { return new Binary('<', a, b); }
+  = a:or_expr _ "=" _ b:or_expr { return {expression: 'binary', operator: '==', lhs: a, rhs: b}; }
+  / a:or_expr _ "<>" _ b:or_expr { return {expression: 'binary', operator: '!=', lhs: a, rhs: b}; }
+  / a:or_expr _ ">=" _ b:or_expr { return {expression: 'binary', operator: '>=', lhs: a, rhs: b}; }
+  / a:or_expr _ "<=" _ b:or_expr { return {expression: 'binary', operator: '<=', lhs: a, rhs: b}; }
+  / a:or_expr _ ">" _ b:or_expr { return {expression: 'binary', operator: '>', lhs: a, rhs: b}; }
+  / a:or_expr _ "<" _ b:or_expr { return {expression: 'binary', operator: '<', lhs: a, rhs: b}; }
 
-or_expr 
-  = first:and_expr rest:( _ ("or" / "+" / "-") _ and_expr )* { return buildList(first, rest, 3,  1, {'or': '||'}); }
+or_binary
+  = lhs:and_expr _ operator:("or" / "+" / "-") _ rhs:or_expr { return {expression: 'binary', operator: operator, lhs: lhs, rhs: rhs}; }
+
+or_expr
+  = or_binary / and_expr
+
+and_binary
+  = lhs:base_expr _ operator:("and" / "*" / "/" / "div" / "mod") _ rhs:and_expr { return {expression: 'binary', operator: operator, lhs: lhs, rhs: rhs}; }
 
 and_expr
-  = first:base_expr rest:( _ ("and" / "*" / "/" / "div" / "mod") _ base_expr )* { return buildList(first, rest, 3,  1, {'and': '&&', 'div': '/', 'mod': '%'}); }
+  = and_binary / base_expr
 
 base_expr
   = primary / nested_expression
 
 nested_expression 
-  = "(" _ expression:expression _ ")" { return new Nested(expression); }
+  = "(" _ expression:expression _ ")" { return {expression: 'nested', nested: expression}; }
+
+// TODO: Workaround
+field_access2 = field_access { return text(); }
 
 primary
-  = function_call / pointer_to / deref / literal / field_access {return text();}
+  = function_call / pointer_to / deref / literal / field_access2
 
 // POINTERS GOES HERE
 // Pointers are solved by storing the variable name the pointer is pointing to, then js `eval` is used
@@ -259,7 +246,7 @@ boolean_literal
   = "true" / "false"
 
 integer_literal
-  = "$" [0-9A-Fa-f]+ { return parseInt(text().substring(1), 16); }
+  = "$" hex:[0-9A-Fa-f]+ { return '0x' + hex.join(''); }
   / [0-9]+ { return text(); }
 
 real_literal
