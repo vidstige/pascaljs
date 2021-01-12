@@ -43,6 +43,30 @@ function Emitter(config) {
     return identifier;
   }
 
+  function format_operator(operator) {
+    switch (operator) {
+      case 'mod': return '%';
+      case 'or': return '||';
+      case 'and': return '&&';
+    }
+    return operator;
+  }
+
+  function format_expression(expression) {
+    if (expression === null) return 'null';
+
+    if (expression.expression == 'binary') {
+      return format_expression(expression.lhs) + ' ' + format_operator(expression.operator) + ' ' + format_expression(expression.rhs);
+    }
+    if (expression.expression == 'call') {
+      return expression.func + "(" + expression.args.map(format_expression).join(', ') + ")";
+    }
+    if (expression.expression == 'nested') {
+      return "(" + format_expression(expression.nested) + ")";
+    }
+    return expression;
+  }
+
   this.emit_statement = function(stmt) {
     switch (stmt.statement) {
       case 'compound':
@@ -51,23 +75,23 @@ function Emitter(config) {
         this.emit_raw('}');
         break;
       case 'call':
-        this.emit_raw(symbol(stmt.target) + '(' + stmt.arguments.join(', ') + ');');
+        this.emit_raw(symbol(stmt.target) + '(' + stmt.arguments.map(format_expression).join(', ') + ');');
         break;
       case 'assignment':
-        this.emit_raw(stmt.to + " = " + stmt.from + ";");
+        this.emit_raw(stmt.to + " = " + format_expression(stmt.from) + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
-        var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + stmt.stop ) : (stmt.variable+'>='+stmt.stop);
+        var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + format_expression(stmt.stop)) : (stmt.variable+'>=' + format_expression(stmt.stop));
         this.emit_raw('for (' + stmt.variable + '=' + stmt.start + '; ' + stop_criterion + '; ' + update + ')');
         this.emit_statement(stmt.do);
         break;
       case 'while':
-        this.emit_raw('while (' + stmt.condition + ")");
+        this.emit_raw('while (' + format_expression(stmt.condition) + ")");
         this.emit_statement(stmt.do);
         break;
       case 'if':
-        this.emit_raw('if (' + stmt.condition + ')');
+        this.emit_raw('if (' + format_expression(stmt.condition) + ')');
         this.emit_statement(stmt.then);
         this.emit_raw('else');
         this.emit_statement(stmt.else);
