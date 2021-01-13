@@ -3,10 +3,9 @@
   "version": "1.0.0",
   "description": "Simple demo page for pascaljs",
   "scripts": {
-    "test": "echo \"Warning: no test specified\" && exit 0",
-    "start": "./node_modules/.bin/webpack-dev-server --progress --colors",
-    "build": "./node_modules/.bin/webpack",
-    "update-docs": "cp -r index.html main.css build ../docs/"
+    "start": "parcel index.html",
+    "build": "parcel build --no-minify index.html",
+    "update-docs": "cp -r dist/* ../docs/ && rm ../docs/*.map"
   },
   "author": "Samuel Carlsson <samuel.carlsson@gmail.com>",
   "license": "Apache-2.0",
@@ -15,8 +14,7 @@
     "url": "https://github.com/vidstige/pascaljs/demo"
   },
   "devDependencies": {
-    "webpack": "^1.14.0",
-    "webpack-dev-server": "^1.16.2"
+    "parcel-bundler": "^1.12.4"
   },
   "dependencies": {}
 }
