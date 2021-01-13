@@ -3,9 +3,9 @@
 <head>
   <meta charset="utf-8">
   <title>pascaljs</title>
-  <link rel="stylesheet" href="main.css"></link>
+  <link rel="stylesheet" href="/main.e25d4637.css">
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-  <script src="build/bundle.js"></script>
+  <script src="/demo.576e3c1f.js"></script>
 </head>
 
 <body>
@@ -27,17 +27,15 @@ end.</div>
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.2.6/ace.js" type="text/javascript" charset="utf-8"></script>
-  <script>
-    var editor = ace.edit("editor");
-    editor.setTheme("ace/theme/monokai");
-    editor.getSession().setMode("ace/mode/pascal");
-    editor.setFontSize(24);
+  <script>var editor = ace.edit("editor");
+editor.setTheme("ace/theme/monokai");
+editor.getSession().setMode("ace/mode/pascal");
+editor.setFontSize(24);
 
-    function runit() {
-      var pascal_source = editor.getSession().getValue();
-      demo.run(pascal_source, 'output');
-    }
-  </script>
+function runit() {
+  var pascal_source = editor.getSession().getValue();
+  demo.run(pascal_source, 'output');
+}</script>
 </body>
 
 </html>
