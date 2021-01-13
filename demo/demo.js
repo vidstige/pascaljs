@@ -4,20 +4,22 @@ var emitter = require('../src/backend/js.js');
 function run(pascal_source, output_id) {
   try {
     var object_code = "";
-    var raw_emit = function (line) {
+    var collect_lines = function (line) {
         object_code += line + "\n";
     };
 
+    // Compile pascal program
     var ast = parser.parse(pascal_source);
-    var e = new emitter.Emitter(raw_emit);
+    var e = new emitter.Emitter({emit_raw: collect_lines});
     e.emit(ast);
 
     // TODO: Special variant of WriteLn that does not write to console.log
+    var output = ""; 
     var original = console.log;
-    var output = "";    
-    console.log = function (line) {
-        output += line;
-    }
+    console.log = function() {
+      const args = Array.prototype.slice.call(arguments);
+      output += args.join('');
+    };
 
     // Run js object code
     eval(object_code);
