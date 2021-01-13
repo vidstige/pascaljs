@@ -4,7 +4,7 @@
   "description": "Simple demo page for pascaljs",
   "scripts": {
     "start": "parcel index.html",
-    "build": "parcel build --no-minify index.html",
+    "build": "parcel build --no-minify --public-url . index.html",
     "update-docs": "cp -r dist/* ../docs/ && rm ../docs/*.map"
   },
   "author": "Samuel Carlsson <samuel.carlsson@gmail.com>",
