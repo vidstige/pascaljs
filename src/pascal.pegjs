@@ -51,7 +51,7 @@
     if (type_name in types) {
       return types[type_name];
     }
-    error('Unknown type "' + type_name + '"');
+    return {kind: 'forward', name: type_name};
   }
 }
 

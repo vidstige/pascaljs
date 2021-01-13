@@ -59,7 +59,7 @@ function Emitter(config) {
       return format_expression(expression.lhs) + ' ' + format_operator(expression.operator) + ' ' + format_expression(expression.rhs);
     }
     if (expression.expression == 'call') {
-      return expression.func + "(" + expression.args.map(format_expression).join(', ') + ")";
+      return symbol(expression.func) + "(" + expression.args.map(format_expression).join(', ') + ")";
     }
     if (expression.expression == 'nested') {
       return "(" + format_expression(expression.nested) + ")";

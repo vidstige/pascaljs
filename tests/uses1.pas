@@ -1,6 +1,8 @@
 program uses1;
 uses unit2;
+var
+    alpha: TAngle;
 begin
-    {WriteLn('alpha = ', NormalizeAngle(320));}
-    DisplayAngle(64);
+    alpha := NormalizeAngle(320);
+    DisplayAngle(alpha);
 end.
