@@ -25,7 +25,11 @@ function initializer_for(type) {
 }
 
 function Emitter(config) {
-  this.emit_raw = config.emit_raw || console.log;
+  var indentation = 0;
+  this._emit_raw = function(line) {
+    console.log('  '.repeat(indentation) + line);
+  };
+  this.emit_raw = config.emit_raw || this._emit_raw;  
   const _symbol_map = {};
 
   const unit_search_paths = config.unit_search_paths || [];
@@ -70,8 +74,9 @@ function Emitter(config) {
   this.emit_statement = function(stmt) {
     switch (stmt.statement) {
       case 'compound':
-        this.emit_raw('{');
+        this.emit_raw('{'); indentation++;
         this.emit_statements(stmt.statements);
+        indentation--;
         this.emit_raw('}');
         break;
       case 'call':
@@ -138,17 +143,21 @@ function Emitter(config) {
 
   this.emit_procedure = function(p) {
     this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
+    indentation++;
     this.emit_node(p.block);
+    indentation--;
     this.emit_raw("}");
   }
 
   this.emit_function = function(f) {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
+    indentation++;
 
     this.emit_variable({'name': f.function, 'type': f.return_type});
     this.emit_node(f.block);
     this.emit_raw('return ' + f.function + ";");
-
+    
+    indentation--;
     this.emit_raw("}");
   }
 
