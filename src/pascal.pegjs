@@ -91,7 +91,7 @@ procedure_header
   = "procedure" _ name:identifier "(" args:argument_list_declaration ")" _ ";" _ { return {name: name, args: args}; }
 
 procedure_declaration 
-  = head:procedure_header _ block:block ";" _ { return {procedure: head.name, arguments: head.args, block: block, ret: false}; }
+  = head:procedure_header _ block:block ";" _ { return {procedure: head.name, arguments: head.args, block: block}; }
 
 function_header
   = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" _ { return {name: name, args: args, return_type: return_type}; }
