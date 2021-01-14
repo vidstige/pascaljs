@@ -227,16 +227,19 @@ function Emitter(config) {
     this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
   }
 
+  this.emit_stdlib = function() {
+    this.emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
+  }
+
   this.emit = function(ast) {
     if (ast.program) {
       // emit std unit
       this.emit_notice();
-      this.emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
-
+      this.emit_stdlib();
       this.emit_node(ast.program);
     } else if (ast.unit) {
       this.emit_notice();
-      this.emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
+      this.emit_stdlib();
   
       this.emit_declarations(ast.unit.interface);
       this.emit_declarations(ast.unit.implementation);
