@@ -9,9 +9,10 @@ $(pegjs):
 src/pascal.js: src/pascal.pegjs $(pegjs)
 	$(pegjs) src/pascal.pegjs
 
+tests/actual/%.out: export NODE_PATH=build/
 tests/actual/%.out: build/%.js
 	@mkdir -p tests/actual/
-	NODE_PATH=build/ node $< > $@ || rm $@
+	node $< > $@ || rm $@
 	@test -f $@
 
 tests/expectations/%.out:
