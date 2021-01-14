@@ -1,6 +1,7 @@
 var fs = require('fs');
 var parser = require('./pascal.js')
 var emitter = require('./backend/js.js');
+const { connect } = require('http2');
 
 function repeat(str, n) {
     return Array(n + 1).join(str);
@@ -22,7 +23,11 @@ try {
             console.error(lines[location.start.line - 1]);
             console.error(repeat(' ', location.start.column - 1) + repeat('^', location.end.column - location.start.column));
         } else {
-            console.error("multiline error not supported");
+            console.error(' '.repeat(location.start.column - 1) + '↓')
+            for (var i = location.start.line - 1; i < location.end.line - 1; i++) {
+                console.error(lines[i]);
+            }
+            console.error(' '.repeat(location.end.column - 1) + '↑')
         }
     } else {
         console.error(e);
