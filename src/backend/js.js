@@ -1,4 +1,5 @@
 // Emits js from pascal ast    
+const fs = require('fs');
 
 function initializer_for(type) {
   if (type.kind == 'array') {
@@ -228,7 +229,8 @@ function Emitter(config) {
   }
 
   this.emit_stdlib = function() {
-    this.emit_raw("function WriteLn() { var args = Array.prototype.slice.call(arguments); console.log(args.join('')); }")
+    const stdlib = fs.readFileSync('./src/backend/_system.js');
+    this.emit_raw(stdlib);
   }
 
   this.emit = function(ast) {
