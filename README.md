@@ -90,7 +90,7 @@ WriteLn('x is ', x);
 - [x] `WriteLn´
 - [ ] Arithmetic
 - [ ] File  I/O
-- [ ] In separate file
+- [x] In separate file
 
 ### Graphics subsystem
 
