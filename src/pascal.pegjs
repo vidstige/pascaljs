@@ -100,10 +100,14 @@ function_declaration
   = head:function_header _ block:block ";" _ { return {function: head.name, arguments: head.args, block: block, return_type: head.return_type}; }
 
 argument_list_declaration
-  = first:argument_declaration? rest:(";" _ argument_declaration)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }
+  = first:argument_declarations? rest:(";" _ argument_declarations)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }
+
+argument_declarations
+  = first:argument_declaration rest:("," _ argument_declaration)* ":" _ t:type { return [{name: first, type: t}].concat(rest.map(function (r) { return {name: r[2], type: t}; })); }
 
 argument_declaration
-  = first:identifier rest:("," _ identifier)* ":" _ t:type { return [{name: first, type: t}].concat(rest.map(function (r) { return {name: r[2], type: t}; })); }
+  = ("var" _)? identifier:identifier { return identifier; }
+
 
 // types
 types
