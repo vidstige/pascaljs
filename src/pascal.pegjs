@@ -53,6 +53,13 @@
     }
     return {kind: 'forward', name: type_name};
   }
+  // Creates a boxed type of an inner type, if enabled is truthy
+  function maybeBox(enable, type) {
+    if (enable) {
+      return {kind: 'boxed', inner: type};
+    }
+    return type;
+  }
 }
 
 start =
@@ -103,11 +110,10 @@ argument_list_declaration
   = first:argument_declarations? rest:(";" _ argument_declarations)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }
 
 argument_declarations
-  = first:argument_declaration rest:("," _ argument_declaration)* ":" _ t:type { return [{name: first, type: t}].concat(rest.map(function (r) { return {name: r[2], type: t}; })); }
+  = var_modifier:"var"? _ first:argument_declaration rest:("," _ argument_declaration)* ":" _ t:type { return [{name: first, type: maybeBox(var_modifier, t)}].concat(rest.map(function (r) { return {name: r[2], type: maybeBox(var_modifier, t)}; })); }
 
 argument_declaration
-  = ("var" _)? identifier:identifier { return identifier; }
-
+  = identifier:identifier
 
 // types
 types
