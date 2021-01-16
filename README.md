@@ -40,7 +40,7 @@ WriteLn('x is ', x);
 
 - [x] Comments
 - [x] Invoke Procedures
-- [ ] `var` parameters
+- [x] `var` parameters
 - [x] Compound
 - [x] `for`
 - [x] `if`
