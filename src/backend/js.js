@@ -1,5 +1,6 @@
 // Emits js from pascal ast    
 const fs = require('fs');
+const { connect } = require('http2');
 
 function initializer_for(type) {
   if (type.kind == 'array') {
@@ -32,6 +33,8 @@ function Emitter(config) {
   };
   this.emit_raw = config.emit_raw || this._emit_raw;  
   const _symbol_map = {};
+
+  const callables = {};
 
   const unit_search_paths = config.unit_search_paths || [];
   for (var i = 0; i < unit_search_paths.length; i++) {
@@ -81,10 +84,36 @@ function Emitter(config) {
         this.emit_raw('}');
         break;
       case 'call':
-        this.emit_raw(symbol(stmt.target) + '(' + stmt.arguments.map(format_expression).join(', ') + ');');
+        // Find boxes
+        const f = callables[stmt.target];
+        const boxes = [];
+        const unboxes = [];
+        const args = [];
+        stmt.arguments.map(function(argument, i) {
+          const parameter = f ? f.arguments[i] : null;
+          const expression = format_expression(argument);
+          if (parameter && parameter.type.kind == 'boxed') {
+            boxes.push(parameter.name + ': {value: ' + expression + '}');
+            unboxes.push(expression + ' = _boxes.' + parameter.name + '.value;');
+            args.push('_boxes.' + parameter.name);
+          } else {
+            args.push(expression);
+          }
+        });
+        if (boxes.length > 0) {
+          this.emit_raw('const _boxes = {' + boxes.join(', ') + '};');
+          // replace assignments to variable inside function
+          this.emit_raw(symbol(stmt.target) + '(' + args.join(', ') + ');');
+          for (var i = 0; i < unboxes.length; i++) {
+            this.emit_raw(unboxes[i]);
+          }
+        } else {
+          // No boxing needed (no "var" arguments)
+          this.emit_raw(symbol(stmt.target) + '(' + args.join(', ') + ');');
+        }
         break;
       case 'assignment':
-        this.emit_raw(stmt.to + " = " + format_expression(stmt.from) + ";");
+        this.emit_raw(symbol(stmt.to) + " = " + format_expression(stmt.from, _symbol_map) + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
@@ -145,7 +174,18 @@ function Emitter(config) {
   this.emit_procedure = function(p) {
     this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
     indentation++;
+    const rm = [];
+    for (var i = 0; i < p.arguments.length; i++) {
+      const argument = p.arguments[i];
+      if (argument.type.kind == 'boxed') {
+        _symbol_map[argument.name] = argument.name + '.value';
+        rm.push(argument.name);
+      }
+    }
     this.emit_node(p.block);
+    for (var i = 0; i < rm.length; i++) {
+      delete _symbol_map[rm[i]];
+    }
     indentation--;
     this.emit_raw("}");
   }
@@ -192,9 +232,11 @@ function Emitter(config) {
         this.emit_uses(d.uses);
       }
       if (d.procedure) {
+        callables[d.procedure] = {procedure: d.procedure, arguments: d.arguments};
         this.emit_procedure(d);
       }
       if (d.function) {
+        callables[d.function] = {function: d.function, arguments: d.arguments};
         this.emit_function(d);
       }
       if (d.constants) {
