@@ -1,6 +1,5 @@
 // Emits js from pascal ast    
 const fs = require('fs');
-const { connect } = require('http2');
 
 function initializer_for(type) {
   if (type.kind == 'array') {
@@ -72,7 +71,13 @@ function Emitter(config) {
     if (expression.expression == 'nested') {
       return "(" + format_expression(expression.nested) + ")";
     }
-    return expression;
+    if (expression.expression == 'field_access') {
+      return format_expression(expression.lvalue) + '.' + format_expression(expression.field);
+    }
+    if (expression.expression == 'array_access') {
+      return format_expression(expression.lvalue) + '[' + format_expression(expression.indexer) + ']';
+    }
+    return symbol(expression);
   }
 
   this.emit_statement = function(stmt) {
@@ -113,7 +118,7 @@ function Emitter(config) {
         }
         break;
       case 'assignment':
-        this.emit_raw(symbol(stmt.to) + " = " + format_expression(stmt.from, _symbol_map) + ";");
+        this.emit_raw(format_expression(stmt.to) + " = " + format_expression(stmt.from, _symbol_map) + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
