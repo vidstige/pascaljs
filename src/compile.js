@@ -1,11 +1,6 @@
 var fs = require('fs');
 var parser = require('./pascal.js')
 var emitter = require('./backend/js.js');
-const { connect } = require('http2');
-
-function repeat(str, n) {
-    return Array(n + 1).join(str);
-}
 
 var filepath = process.argv[2];
 var pascal_source = fs.readFileSync(filepath, "utf8");
@@ -21,7 +16,7 @@ try {
         var lines = pascal_source.split(/\r?\n/);
         if (location.start.line == location.end.line) {
             console.error(lines[location.start.line - 1]);
-            console.error(repeat(' ', location.start.column - 1) + repeat('^', location.end.column - location.start.column));
+            console.error(' '.repeat(location.start.column - 1) + '^'.repeat(location.end.column - location.start.column));
         } else {
             console.error(' '.repeat(location.start.column - 1) + '↓')
             for (var i = location.start.line - 1; i < location.end.line - 1; i++) {
