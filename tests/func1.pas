@@ -1,5 +1,5 @@
 program Sample;
-  function Add(A, B: Boolean): Integer;
+  function Add(A, B: Boolean): Boolean;
   begin
     Add := A or B;
   end;
