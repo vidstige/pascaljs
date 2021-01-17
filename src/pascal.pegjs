@@ -161,13 +161,16 @@ assignment
   = lvalue:lvalue _ ":=" _ value:expression { return {statement: 'assignment', to: lvalue, from: value}; }
 
 lvalue
-  = field_access { return text(); }
+  = field_access / array_accesses
 
 field_access
-  = (array_access "." lvalue) / array_access { return text(); }
+  = lvalue:array_accesses "." field:lvalue { return {expression: 'field_access', lvalue: lvalue, field: field}; }
+
+array_accesses
+  = array_access / identifier
 
 array_access
-  = (identifier "[" expression "]") / identifier { return text(); }
+  = lvalue:identifier "[" indexer:expression "]" { return {expression: 'array_access', lvalue: lvalue, indexer: indexer}; }
 
 procedure_call
   = procedure:identifier _ "(" args:argument_list ")"  { return {statement: 'call', target: procedure, arguments: args}; }
@@ -220,11 +223,8 @@ base_expr
 nested_expression 
   = "(" _ expression:expression _ ")" { return {expression: 'nested', nested: expression}; }
 
-// TODO: Workaround
-field_access2 = field_access { return text(); }
-
 primary
-  = function_call / pointer_to / deref / literal / field_access2
+  = function_call / pointer_to / deref / literal / lvalue
 
 // POINTERS GOES HERE
 // Pointers are solved by storing the variable name the pointer is pointing to, then js `eval` is used
