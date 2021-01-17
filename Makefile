@@ -16,7 +16,9 @@ tests/actual/%.out: build/%.js
 	@test -f $@
 
 tests/expectations/%.out:
-	touch $@
+	@mkdir -p build/fpc/
+	fpc $(patsubst tests/expectations/%.out,tests/%.pas,$@) -FEbuild/fpc
+	$(patsubst tests/expectations/%.out,build/fpc/%,$@) > $@
 
 verify/%: tests/actual/%.out tests/expectations/%.out
 	@./verify.sh $^
