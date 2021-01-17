@@ -1,6 +1,6 @@
 program v;
 var
-    x: Integer;
+    x: String;
 begin
     x := 'y';
     WriteLn('x is ', x);
