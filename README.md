@@ -9,9 +9,9 @@ made in the 90s that depend on asm, but otherwise very simple pascal.
 The generated js output is very sensible and lean. For example the following pascal program:
 
 ```pascal
-program v;
+program HelloWorld;
 var
-    x: Integer;
+    x: String;
 begin
     x := 'y';
     WriteLn('x is ', x);
@@ -48,7 +48,7 @@ WriteLn('x is ', x);
 - [x] `while`
 - [ ] `repeat`
 - [ ] `with`
-- [ ] Recursive calls
+- [x] Recursive calls
 
 ### Expressions
 
