@@ -32,6 +32,7 @@ function Emitter(config) {
   };
   this.emit_raw = config.emit_raw || this._emit_raw;  
   const _symbol_map = {};
+  const _function_map = {};
 
   const callables = {};
 
@@ -46,6 +47,12 @@ function Emitter(config) {
   function symbol(identifier) {
     if (identifier in _symbol_map) {
       return _symbol_map[identifier];
+    }
+    return identifier;
+  }
+  function function_symbol(identifier) {
+    if (identifier in _function_map) {
+      return _function_map[identifier];
     }
     return identifier;
   }
@@ -66,7 +73,7 @@ function Emitter(config) {
       return format_expression(expression.lhs) + ' ' + format_operator(expression.operator) + ' ' + format_expression(expression.rhs);
     }
     if (expression.expression == 'call') {
-      return symbol(expression.func) + "(" + expression.args.map(format_expression).join(', ') + ")";
+      return function_symbol(expression.func) + "(" + expression.args.map(format_expression).join(', ') + ")";
     }
     if (expression.expression == 'nested') {
       return "(" + format_expression(expression.nested) + ")";
@@ -108,13 +115,13 @@ function Emitter(config) {
         if (boxes.length > 0) {
           this.emit_raw('const _boxes = {' + boxes.join(', ') + '};');
           // replace assignments to variable inside function
-          this.emit_raw(symbol(stmt.target) + '(' + args.join(', ') + ');');
+          this.emit_raw(function_symbol(stmt.target) + '(' + args.join(', ') + ');');
           for (var i = 0; i < unboxes.length; i++) {
             this.emit_raw(unboxes[i]);
           }
         } else {
           // No boxing needed (no "var" arguments)
-          this.emit_raw(symbol(stmt.target) + '(' + args.join(', ') + ');');
+          this.emit_raw(function_symbol(stmt.target) + '(' + args.join(', ') + ');');
         }
         break;
       case 'assignment':
@@ -198,10 +205,12 @@ function Emitter(config) {
   this.emit_function = function(f) {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
     indentation++;
-
-    this.emit_variable({'name': f.function, 'type': f.return_type});
+    const result_name = '_result';
+    this.emit_variable({'name': result_name, 'type': f.return_type});
+    _symbol_map[f.function] = result_name;
     this.emit_node(f.block);
-    this.emit_raw('return ' + f.function + ";");
+    delete _symbol_map[f.function];
+    this.emit_raw('return ' + result_name + ";");
     
     indentation--;
     this.emit_raw("}");
@@ -225,6 +234,7 @@ function Emitter(config) {
       for (var key in module) {
         if (module.hasOwnProperty(key)) {
           _symbol_map[key] = unit_name + '.' + key;
+          _function_map[key] = unit_name + '.' + key;
         }
       }
     }
