@@ -35,6 +35,16 @@ function Emitter(config) {
   const _function_map = {};
 
   const callables = {};
+  const variables = [{}]; // List of objects - pushed and popped as needed
+  function findVariable(name) {
+    for (var i = variables.length - 1; i >= 0; i--) {
+      const scope = variables[i];
+      if (name in scope) {
+        return scope[name];
+      }
+    }
+    throw "Undefined variable: " + name;
+  }
 
   const unit_search_paths = config.unit_search_paths || [];
   for (var i = 0; i < unit_search_paths.length; i++) {
@@ -92,8 +102,7 @@ function Emitter(config) {
       case 'compound':
         this.emit_raw('{'); indentation++;
         this.emit_statements(stmt.statements);
-        indentation--;
-        this.emit_raw('}');
+        indentation--; this.emit_raw('}');
         break;
       case 'call':
         // Find boxes
@@ -144,7 +153,20 @@ function Emitter(config) {
         this.emit_statement(stmt.else);
         break;
       case 'with':
+        const type = findVariable(stmt.lvalue);
+        if (type.kind != 'record') {
+          throw "Expected record";
+        }
+        const rm = [];
+        for (var i = 0; i < type.members.length; i++) {
+          const member = type.members[i];
+          _symbol_map[member.name] = stmt.lvalue + '.' + member.name;
+          rm.push(member.name);
+        }
         this.emit_statement(stmt.do);
+        for (var i = 0; i < rm.length; i++) {
+          delete _symbol_map[rm[i]];
+        }
         break;
       default:
         throw "Unknown statement: " + stmt.statement;
@@ -174,7 +196,10 @@ function Emitter(config) {
 
   this.emit_variable = function(variable) {
     var initializer = initializer_for(variable.type);
-    this.emit_raw("var " + variable.name + " = " + initializer + ";" + " // " + variable.type.name);
+    // add to variable scope
+    const scope = variables[variables.length - 1];
+    scope[variable.name] = variable.type;
+    this.emit_raw("var " + variable.name + " = " + initializer + ";");
   }
 
   this.emit_variables = function(variables) {
@@ -267,8 +292,10 @@ function Emitter(config) {
   }
 
   this.emit_node = function(node) {
+    variables.push({}); // push new variables scope
     this.emit_declarations(node.declarations);
     this.emit_statements(node.statements);
+    variables.splice(-1, 1); // pop last element
   }
 
   this.emit_notice = function() {
