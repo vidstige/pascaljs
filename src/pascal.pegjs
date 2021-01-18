@@ -152,7 +152,7 @@ type "type"
 
 // STATEMENTS
 statement
-  = compound / procedure_call / assignment / if_stmt / for / while
+  = compound / procedure_call / assignment / if_stmt / for / while / with
 
 compound
   = "begin" _ stmts:statements _ "end" { return {statement: 'compound', statements: stmts}; }
@@ -189,6 +189,8 @@ for
 
 while
   = "while" _ condition:expression _ "do" _ stmt:statement { return {statement: 'while', condition: condition, do: stmt }; }
+
+with = "with" __ lvalue:lvalue __ "do" __ stmt:statement { return {statement: 'with', lvalue: lvalue, do: stmt}; }
 
 // HERE GOES EXPRESSIONS
 function_call "function call"
