@@ -143,6 +143,9 @@ function Emitter(config) {
         this.emit_raw('else');
         this.emit_statement(stmt.else);
         break;
+      case 'with':
+        this.emit_statement(stmt.do);
+        break;
       default:
         throw "Unknown statement: " + stmt.statement;
     }
