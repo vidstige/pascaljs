@@ -1,6 +1,16 @@
 // Emits js from pascal ast    
 const fs = require('fs');
 
+function find(stack, key) {
+  for (var i = stack.length - 1; i >= 0; i--) {
+    const scope = stack[i];
+    if (key in scope) {
+      return scope[key];
+    }
+  }
+  throw "No such key: " + key;
+}
+
 function initializer_for(type) {
   if (type.kind == 'array') {
     if (type.of.kind == "record") {
@@ -37,13 +47,7 @@ function Emitter(config) {
   const callables = {};
   const variables = [{}]; // List of objects - pushed and popped as needed
   function findVariable(name) {
-    for (var i = variables.length - 1; i >= 0; i--) {
-      const scope = variables[i];
-      if (name in scope) {
-        return scope[name];
-      }
-    }
-    throw "Undefined variable: " + name;
+    return find(variables, name);
   }
 
   const unit_search_paths = config.unit_search_paths || [];
