@@ -159,6 +159,12 @@ function Emitter(config) {
         this.emit_raw('while (' + format_expression(stmt.condition) + ")");
         this.emit_statement(stmt.do);
         break;
+      case 'repeat':
+        this.emit_raw('do {'); indentation++;
+        this.emit_statements(stmt.statements);
+        indentation--;
+        this.emit_raw('} while (!(' + format_expression(stmt.condition) + "));");
+        break;
       case 'if':
         this.emit_raw('if (' + format_expression(stmt.condition) + ')');
         this.emit_statement(stmt.then);

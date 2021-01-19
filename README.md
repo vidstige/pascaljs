@@ -46,7 +46,7 @@ WriteLn('x is ', x);
 - [x] `if`
 - [x] assignment
 - [x] `while`
-- [ ] `repeat`
+- [x] `repeat`
 - [x] `with`
 - [x] Recursive calls
 
