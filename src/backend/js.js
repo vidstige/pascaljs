@@ -1,14 +1,25 @@
 // Emits js from pascal ast    
+const { SSL_OP_DONT_INSERT_EMPTY_FRAGMENTS } = require('constants');
 const fs = require('fs');
 
-function find(stack, key) {
+function stack_push(stack, top) {
+  stack.push(top || {});
+}
+function stack_pop(stack) {
+  return stack.splice(-1, 1); // pop last element
+}
+function stack_insert(stack, key, value) {
+  const scope = stack[stack.length - 1];
+  scope[key] = value;
+}
+function find(stack, key, missing) {
   for (var i = stack.length - 1; i >= 0; i--) {
     const scope = stack[i];
     if (key in scope) {
       return scope[key];
     }
   }
-  throw "No such key: " + key;
+  return missing;
 }
 
 function initializer_for(type) {
@@ -41,13 +52,17 @@ function Emitter(config) {
     console.log('  '.repeat(indentation) + line);
   };
   this.emit_raw = config.emit_raw || this._emit_raw;  
-  const _symbol_map = {};
-  const _function_map = {};
+  const _symbol_map = [{}];
+  const _function_map = [{}];
 
   const callables = {};
   const variables = [{}]; // List of objects - pushed and popped as needed
   function findVariable(name) {
-    return find(variables, name);
+    const type = find(variables, name);
+    if (!type) {
+      throw "Unknown variable " + name;
+    }
+    return type;
   }
 
   const unit_search_paths = config.unit_search_paths || [];
@@ -59,16 +74,10 @@ function Emitter(config) {
   }
   
   function symbol(identifier) {
-    if (identifier in _symbol_map) {
-      return _symbol_map[identifier];
-    }
-    return identifier;
+    return find(_symbol_map, identifier, identifier);
   }
   function function_symbol(identifier) {
-    if (identifier in _function_map) {
-      return _function_map[identifier];
-    }
-    return identifier;
+    return find(_function_map, identifier, identifier);
   }
 
   function format_operator(operator) {
@@ -138,7 +147,7 @@ function Emitter(config) {
         }
         break;
       case 'assignment':
-        this.emit_raw(format_expression(stmt.to) + " = " + format_expression(stmt.from, _symbol_map) + ";");
+        this.emit_raw(format_expression(stmt.to) + " = " + format_expression(stmt.from) + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
@@ -161,16 +170,13 @@ function Emitter(config) {
         if (type.kind != 'record') {
           throw "Expected record";
         }
-        const rm = [];
+        stack_push(_symbol_map);
         for (var i = 0; i < type.members.length; i++) {
           const member = type.members[i];
-          _symbol_map[member.name] = stmt.lvalue + '.' + member.name;
-          rm.push(member.name);
+          stack_insert(_symbol_map, member.name, stmt.lvalue + '.' + member.name);
         }
         this.emit_statement(stmt.do);
-        for (var i = 0; i < rm.length; i++) {
-          delete _symbol_map[rm[i]];
-        }
+        stack_pop(_symbol_map);
         break;
       default:
         throw "Unknown statement: " + stmt.statement;
@@ -201,8 +207,7 @@ function Emitter(config) {
   this.emit_variable = function(variable) {
     var initializer = initializer_for(variable.type);
     // add to variable scope
-    const scope = variables[variables.length - 1];
-    scope[variable.name] = variable.type;
+    stack_insert(variables, variable.name, variable.type);
     this.emit_raw("var " + variable.name + " = " + initializer + ";");
   }
 
@@ -218,30 +223,27 @@ function Emitter(config) {
   this.emit_procedure = function(p) {
     this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
     indentation++;
-    const rm = [];
+    stack_push(_symbol_map);
     for (var i = 0; i < p.arguments.length; i++) {
       const argument = p.arguments[i];
       if (argument.type.kind == 'boxed') {
-        _symbol_map[argument.name] = argument.name + '.value';
-        rm.push(argument.name);
+        stack_insert(_symbol_map, argument.name, argument.name + '.value');
       }
     }
     this.emit_node(p.block);
-    for (var i = 0; i < rm.length; i++) {
-      delete _symbol_map[rm[i]];
-    }
-    indentation--;
-    this.emit_raw("}");
+    stack_pop(_symbol_map);
+    indentation--; this.emit_raw("}");
   }
 
   this.emit_function = function(f) {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
     indentation++;
+    stack_push(_symbol_map);
     const result_name = '_result';
+    stack_insert(_symbol_map, f.function, result_name);
     this.emit_variable({'name': result_name, 'type': f.return_type});
-    _symbol_map[f.function] = result_name;
     this.emit_node(f.block);
-    delete _symbol_map[f.function];
+    stack_pop(_symbol_map);
     this.emit_raw('return ' + result_name + ";");
     
     indentation--;
@@ -265,8 +267,8 @@ function Emitter(config) {
       this.emit_raw("const " + unit_name + " = require('" + unit_name + "');");
       for (var key in module) {
         if (module.hasOwnProperty(key)) {
-          _symbol_map[key] = unit_name + '.' + key;
-          _function_map[key] = unit_name + '.' + key;
+          stack_insert(_symbol_map, key, unit_name + '.' + key);
+          stack_insert(_function_map, key, unit_name + '.' + key);
         }
       }
     }
@@ -296,10 +298,10 @@ function Emitter(config) {
   }
 
   this.emit_node = function(node) {
-    variables.push({}); // push new variables scope
+    stack_push(variables);
     this.emit_declarations(node.declarations);
     this.emit_statements(node.statements);
-    variables.splice(-1, 1); // pop last element
+    stack_pop(variables);
   }
 
   this.emit_notice = function() {
