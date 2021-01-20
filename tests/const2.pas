@@ -1,4 +1,8 @@
 program Const2;
+type
+  TRgb = record
+    r, g, b: Byte;
+  end;
 const
   I: Integer = 123;
   S: String = 'hej';
@@ -6,6 +10,7 @@ const
   HEX10 = $10;
   HEX3f = $3f;
   HEX3F = $3F;
+  BLACK: TRgb = (r:$00; g:$00; b:$00);
 begin
   WriteLn('I = ', I);
   WriteLn('S = ', S);

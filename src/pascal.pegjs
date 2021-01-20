@@ -10,21 +10,6 @@
       }
       return results;
   }
-  function buildList(first, rest, n, joiner, join_translation) {
-    var results = first ? [first] : [];
-    for (var i = 0; i < rest.length; i++) {
-      if (joiner) {
-        var j = rest[i][joiner];
-        if (j in join_translation) {
-          results.push(join_translation[j]);
-        } else {
-          results.push(j);
-        }
-      }
-      results.push(rest[i][n]);
-    }
-    return results.join(' ');
-  }
   function flatten(arrays) {
     return Array.prototype.concat.apply([], arrays);
   }
@@ -133,6 +118,18 @@ constant
 const_literal
   = literal
   / "(" _ values:argument_list _ ")" { return '[' + values + ']'; }
+  / "(" _ first:field_literal rest:(";" _ field_literal)* ")" { 
+      const fields = [first].concat(nth(rest, 2));
+      var result = [];
+      for (var i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        result.push(field.name + ": " + field.value);
+      }
+      return "{" + result.join(', ') + "}";
+    }
+
+field_literal
+  = field:identifier _ ":" _ value:literal { return {name: field, value: value}; }
 
 // VARIABLE DECLARATION
 vars
