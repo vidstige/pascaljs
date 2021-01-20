@@ -1,11 +1,16 @@
-program Sample;
-  function Add(A, B: Boolean): Boolean;
-  begin
-    Add := A or B;
-  end;
+program func1;
+function simple(A, B: Boolean): Boolean;
+begin
+  simple := A or B;
+end;
+function NoParameters: Boolean;
+begin
+  NoParameters := false;
+end;
 var
   r: Boolean;
 begin
-  r := Add(true, false);
+  r := simple(true, false);
   WriteLn('A or B ', r);
+  WriteLn('NoParameters() ', NoParameters());
 end.
