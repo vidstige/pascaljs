@@ -133,11 +133,11 @@ field_literal
 
 // VARIABLE DECLARATION
 vars
-  = "var" _ vars:var+ { return {vars: vars}; } 
-  
-// TODO: Reuse argument_declaration
-var
-  = variable_name:identifier ":" _ type:type ";" _ { return {name: variable_name, type: type}; }
+  = "var" _ vars:var_declaration+ { return {vars: flatten(vars)}; } 
+
+var_declaration
+  = first:identifier rest:("," _ identifier)* ":" _ t:type _ ";" _ { return [{name: first, type: t}].concat(rest.map(function (r) { return {name: r[2], type: t}; })); }
+
 
 // TODO: Allow const ints for bounds
 // TODO: Return proper ast for array types.

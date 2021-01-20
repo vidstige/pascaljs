@@ -1,7 +1,6 @@
 program comparisions;
 var
-    x: Integer;
-    y: Integer;
+    x, y: Integer;
     z: Boolean;
 begin
     x := 17;
