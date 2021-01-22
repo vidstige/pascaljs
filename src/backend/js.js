@@ -85,7 +85,9 @@ function Emitter(config) {
       case 'mod': return '%';
       case 'or': return '||';
       case 'and': return '&&';
+      case 'not': return '!';
     }
+    //throw "Unknown operator: " + operator;
     return operator;
   }
 
@@ -94,6 +96,9 @@ function Emitter(config) {
 
     if (expression.expression == 'binary') {
       return format_expression(expression.lhs) + ' ' + format_operator(expression.operator) + ' ' + format_expression(expression.rhs);
+    }
+    if (expression.expression == 'unary') {
+      return format_operator(expression.operator) + expression.operand;
     }
     if (expression.expression == 'call') {
       return function_symbol(expression.func) + "(" + expression.args.map(format_expression).join(', ') + ")";
