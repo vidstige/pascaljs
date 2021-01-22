@@ -173,8 +173,10 @@ function Emitter(config) {
       case 'if':
         this.emit_raw('if (' + format_expression(stmt.condition) + ')');
         this.emit_statement(stmt.then);
-        this.emit_raw('else');
-        this.emit_statement(stmt.else);
+        if (stmt.else) {
+          this.emit_raw('else');
+          this.emit_statement(stmt.else);
+        }
         break;
       case 'with':
         const type = findVariable(stmt.lvalue);
