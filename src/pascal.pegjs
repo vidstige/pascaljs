@@ -151,7 +151,7 @@ type "type"
 
 // STATEMENTS
 statement
-  = compound / procedure_call / assignment / if_stmt / for / while / repeat / with
+  = compound / procedure_call / assignment / if_else_stmt / for / while / repeat / with
 
 compound
   = "begin" _ stmts:statements _ "end" { return {statement: 'compound', statements: stmts}; }
@@ -180,7 +180,7 @@ argument_list
 argument
   = expression
 
-if_stmt
+if_else_stmt
   = "if" _ e:expression _ "then" _ stmt1:statement _ "else" _ stmt2:statement { return {statement: 'if', condition: e, then: stmt1, else: stmt2}; }
 
 for
