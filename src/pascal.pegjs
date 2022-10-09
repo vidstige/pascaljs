@@ -71,6 +71,22 @@ declarations
 declaration_part
   = uses / types / constants / vars / procedure_declaration / function_declaration
 
+// ASSEMBLER
+assembly_block
+  = "asm" _ as:assembly_statements _ "end" { return {statement: 'assembly_block', statements: as}; }
+
+assembly_register
+  = "ax" / "bx" / "cx" / "dx" / "ds" / "es" / "di" / "si"
+
+assembly_lvalue = assembly_register / lvalue
+
+newline = '\n' / '\r' '\n'?
+
+assembly_statements = all:(assembly_statement _)*  { return nth(all, 0); }
+
+assembly_statement
+  = "mov" _ from:expression _ "," _ to:assembly_lvalue { return {'mnemonic': 'mov', from: from, to: to}; }
+
 // UNIT PARTS
 interface_part
   = (uses / types / constants / vars / procedure_header / function_header)*
@@ -151,7 +167,7 @@ type "type"
 
 // STATEMENTS
 statement
-  = compound / procedure_call / assignment / if_else / if / for / while / repeat / with
+  = compound / assembly_block / procedure_call / assignment / if_else / if / for / while / repeat / with
 
 compound
   = "begin" _ stmts:statements _ "end" { return {statement: 'compound', statements: stmts}; }

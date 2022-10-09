@@ -115,6 +115,10 @@ function Emitter(config) {
     return symbol(expression);
   }
 
+  this._emit_assignment = function(stmt) {
+    this.emit_raw(format_expression(stmt.to) + " = " + format_expression(stmt.from) + ";");
+  };
+
   this.emit_statement = function(stmt) {
     switch (stmt.statement) {
       case 'compound':
@@ -152,7 +156,7 @@ function Emitter(config) {
         }
         break;
       case 'assignment':
-        this.emit_raw(format_expression(stmt.to) + " = " + format_expression(stmt.from) + ";");
+        this._emit_assignment(stmt);
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
@@ -191,10 +195,25 @@ function Emitter(config) {
         this.emit_statement(stmt.do);
         stack_pop(_symbol_map);
         break;
+      case 'assembly_block':
+        this._emit_assembler(stmt.statements);
+        break;
       default:
         throw "Unknown statement: " + stmt.statement;
     }
   }
+  this._emit_assembler = function(assembly_statements) {
+    for (var i = 0; i < assembly_statements.length; i++) {
+      const statement = assembly_statements[i];
+      switch (statement.mnemonic.toLowerCase()) {
+        case 'mov':
+          this._emit_assignment(statement);
+          break;
+        default:
+          throw "Unknown mnemonic: " + statement.mnemonic;
+      }
+    }
+  };
 
   this.emit_statements = function(statements) {
     for (var i = 0; i < statements.length; i++)
