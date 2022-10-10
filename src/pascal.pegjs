@@ -86,6 +86,10 @@ assembly_statements = all:(assembly_statement _)*  { return nth(all, 0); }
 
 assembly_statement
   = "mov" _ from:expression _ "," _ to:assembly_lvalue { return {'mnemonic': 'mov', from: from, to: to}; }
+  / "dec" _ target:assembly_lvalue { return {'mnemonic': 'dec', target: target}; }
+  / "inc" _ target:assembly_lvalue { return {'mnemonic': 'inc', target: target}; }
+  / "sub" _ target:assembly_lvalue _ "," _ operand:expression { return {'mnemonic': 'sub', target: target, operand: operand}; }
+  / "add" _ target:assembly_lvalue _ "," _ operand:expression { return {'mnemonic': 'add', target: target, operand: operand}; }
 
 // UNIT PARTS
 interface_part
