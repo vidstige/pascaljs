@@ -209,6 +209,18 @@ function Emitter(config) {
         case 'mov':
           this._emit_assignment(statement);
           break;
+        case 'dec':
+          this.emit_raw(format_expression(statement.target) + "--;");
+          break;
+        case 'inc':
+          this.emit_raw(format_expression(statement.target) + "++;");
+          break;
+        case 'sub':
+          this.emit_raw(format_expression(statement.target) + " -= " + format_expression(statement.operand) + ";");
+          break
+        case 'add':
+          this.emit_raw(format_expression(statement.target) + " += " + format_expression(statement.operand) + ";");
+          break
         default:
           throw "Unknown mnemonic: " + statement.mnemonic;
       }
