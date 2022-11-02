@@ -25,7 +25,7 @@ verify/%: tests/actual/%.out tests/expectations/%.out
 
 test: $(VERIFICATION)
 
-build/%.js: tests/%.pas src/compile.js src/pascal.js src/backend/js.js
+build/%.js: tests/%.pas src/compile.js src/pascal.js src/backend/js.js src/backend/assembler.js
 	@mkdir -p build/
 	node src/compile.js $< > $@ || rm $@
 	@test -f $@
