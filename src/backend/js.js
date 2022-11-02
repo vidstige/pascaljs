@@ -206,7 +206,7 @@ function Emitter(config) {
       const statement = assembly_statements[i];
       switch (statement.mnemonic.toLowerCase()) {
         case 'mov':
-          this._emit_assignment(statement);
+          this.emit_raw(format_expression(statement.target) + " = " + format_expression(statement.source) + ";");
           break;
         case 'dec':
           this.emit_raw(format_expression(statement.target) + "--;");
@@ -220,6 +220,9 @@ function Emitter(config) {
         case 'add':
           this.emit_raw(format_expression(statement.target) + " += " + format_expression(statement.operand) + ";");
           break
+        case 'xor':
+          this.emit_raw(format_expression(statement.target) + " ^= " + format_expression(statement.operand) + ";");
+          break;
         default:
           throw "Unknown mnemonic: " + statement.mnemonic;
       }
