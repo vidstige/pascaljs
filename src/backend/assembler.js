@@ -1,15 +1,74 @@
+// https://dl.acm.org/doi/pdf/10.1145/3547621
+// https://en.wikipedia.org/wiki/Dominator_(graph_theory)
+
+// returns a set containing the elements that are in all sets
+function intersection(sets) {
+  var everything = new Set();
+  for (var set of sets) {
+    for (var element of set) {
+      everything.add(element);
+    }
+  }
+
+  var rm = [];
+  for (var element of everything) {
+    for (var set of sets) {
+      if (!set.has(element)) {
+        rm.push(element);
+        break;
+      }
+    }
+  }
+  for (var element in rm) {
+    everything.remove(element);
+  }
+  return everything;
+}
+
 function isBranch(statement) {
   return statement.mnemonic == 'loop';
 }
+
 function findPrevious(leaders, node) {
   return Math.min.apply(null, leaders.filter(leader => leader < node));
 }
-function findNext(leaders, node) {
-  const index = leaders.indexOf(node);
-  if (index < 0) {
-    throw "Could not find node " + node;
+
+function get_parents(node, edges) {
+  return edges.filter(edge => edge.target == node).map(edge => edge.source);
+}
+
+function find_dominators(nodes, edges) {
+  const start = 0
+  var dom = {};
+  for (var node of nodes) {
+    if (node == start) {
+      // dominator of the start node is the start itself
+      dom[node] = new Set([node]);
+    } else {
+      // for all other nodes, set all nodes as the dominators
+      dom[node] = new Set(nodes);
+    }
   }
-  return leaders[index + 1];
+
+  // iteratively eliminate nodes that are not dominators
+  var changed = true;
+  while (changed) { // changes in any Dom(n)
+    changed = false;
+    for (var node of nodes) {
+      if (node == start) continue; // skip start node
+      // samuel: what's predecesors? Must be parents in the cfg, right?
+      var domp = [];
+      for (var parent of get_parents(node, edges)) {
+        domp.push(dom[parent]);
+      }
+      var newValue = intersection(domp);
+      newValue.add(node);
+      changed |= newValue == dom[node];
+      dom[node] = newValue;
+      //Dom(n) = {n} union with intersection over Dom(p) for all p in pred(n)
+    }
+  }
+  return dom;
 }
 
 class ControlFlowGraph {
@@ -51,7 +110,8 @@ class ControlFlowGraph {
     leaders.sort(function (a, b) { return a - b; });
 
     // 3. Compute Immediate Dominator Tree (DomT)
-    
+    const dominators = find_dominators(leaders, edges);
+    console.error(dominators);
 
     this.leaders = leaders;
     this.edges = edges;
