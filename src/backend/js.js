@@ -1,5 +1,6 @@
 // Emits js from pascal ast    
 const fs = require('fs');
+const assembler = require('./assembler.js');
 
 function stack_push(stack, top) {
   stack.push(top || {});
@@ -195,6 +196,9 @@ function Emitter(config) {
         stack_pop(_symbol_map);
         break;
       case 'assembly_block':
+        const cfg = new assembler.ControlFlowGraph(stmt.statements);
+        const reduced = cfg.reduce(0);
+        //this.emit_statements(reduced);
         this._emit_assembler(stmt.statements);
         break;
       default:
