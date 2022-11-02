@@ -227,6 +227,9 @@ function Emitter(config) {
         case 'xor':
           this.emit_raw(format_expression(statement.target) + " ^= " + format_expression(statement.operand) + ";");
           break;
+        case 'cmp':
+          this.emit_raw('__register.flags = ' + format_expression(statement.a) + " - " + format_expression(statement.b) + ";");
+          break;
         default:
           throw "Unknown mnemonic: " + statement.mnemonic;
       }
