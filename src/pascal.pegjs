@@ -82,14 +82,24 @@ assembly_lvalue = assembly_register / lvalue
 
 newline = '\n' / '\r' '\n'?
 
-assembly_statements = all:(assembly_statement _)*  { return nth(all, 0); }
+assembly_statements = all:(labeled_assembly_statement _)*  { return nth(all, 0); }
+
+assembly_label = "@" label:identifier { return label; }
+
+labeled_assembly_statement
+  = label:(assembly_label ":" _)? statement:assembly_statement {
+    if (label) statement.label = label[0];
+    return statement;
+  }
 
 assembly_statement
-  = "mov" _ from:expression _ "," _ to:assembly_lvalue { return {'mnemonic': 'mov', from: from, to: to}; }
-  / "dec" _ target:assembly_lvalue { return {'mnemonic': 'dec', target: target}; }
-  / "inc" _ target:assembly_lvalue { return {'mnemonic': 'inc', target: target}; }
-  / "sub" _ target:assembly_lvalue _ "," _ operand:expression { return {'mnemonic': 'sub', target: target, operand: operand}; }
-  / "add" _ target:assembly_lvalue _ "," _ operand:expression { return {'mnemonic': 'add', target: target, operand: operand}; }
+  = "mov" _ source:expression _ "," _ target:assembly_lvalue { return {mnemonic: 'mov', source: source, target: target}; }
+  / "dec" _ target:assembly_lvalue { return {mnemonic: 'dec', target: target}; }
+  / "inc" _ target:assembly_lvalue { return {mnemonic: 'inc', target: target}; }
+  / "sub" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'sub', target: target, operand: operand}; }
+  / "add" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'add', target: target, operand: operand}; }
+  / "xor" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'xor', target: target, operand: operand}; }
+  / "loop" _ label:assembly_label _ { return {mnemonic: 'loop', to: label}; }
 
 // UNIT PARTS
 interface_part
