@@ -100,7 +100,7 @@ assembly_statement
   / "add" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'add', target: target, operand: operand}; }
   / "xor" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'xor', target: target, operand: operand}; }
   / "cmp" _ a:assembly_lvalue _ "," _ b:expression { return {mnemonic: 'cmp', a: a, b: b}; }
-  / "jne" _ label:assembly_label { return {mnemonic: 'je', to: label}; }
+  / "jne" _ label:assembly_label { return {mnemonic: 'jne', to: label}; }
   / "loop" _ label:assembly_label { return {mnemonic: 'loop', to: label}; }
 
 // UNIT PARTS
