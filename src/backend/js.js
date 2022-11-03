@@ -196,8 +196,9 @@ function Emitter(config) {
         stack_pop(_symbol_map);
         break;
       case 'assembly_block':
-        const cfg = new assembler.ControlFlowGraph(stmt.statements);
-        const reduced = cfg.reduce(0);
+        const cfg = assembler.ControlFlowGraph.build(stmt.statements);
+        assembler.buildDominatorTree(cfg);
+
         //this.emit_statements(reduced);
         this._emit_assembler(stmt.statements);
         break;
