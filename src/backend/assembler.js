@@ -11,8 +11,8 @@ function findNode(leaders, index) {
 }
 
 class ControlFlowGraph {
-  constructor(nodes, edges) {
-    this.start = 0;
+  constructor(nodes, edges, start) {
+    this.start = start || 0;
     this.nodes = nodes;
     this.edges = edges;
   }
@@ -52,26 +52,19 @@ class ControlFlowGraph {
 
     return new ControlFlowGraph(leaders, edges);
   }
+  _postOrder(node, visited) {
+    var tmp = [];
+    visited.add(node);
+    for (var child of this.childs(node)) {
+      if (visited.has(child)) continue;
+      tmp.push(...this._postOrder(child, visited));
+    }
+    tmp.push(node);
+    return tmp;
+  }
   postOrder() {
     // returns the nodes in post-order (dfs)
-    var order = [];
-    var queue = [this.start];
-    while (queue.length > 0) {
-      const node = queue.shift();
-      // visit all childs
-      for (var child of this.childs(node)) {
-        if (!order.includes(child)) {
-          order.push(child);
-        }
-        queue.push(child);
-      }
-      // visit myself
-      if (!order.includes(node)) {
-        order.push(node);
-      }
-    }
-    if (order.length != this.nodes.length) throw "Post order";
-    return order;
+    return this._postOrder(this.start, new Set());
   }
   childs(node) {
     return this.edges.filter(edge => edge.source == node).map(edge => edge.target);
@@ -80,12 +73,13 @@ class ControlFlowGraph {
     return new ControlFlowGraph(
       this.nodes.filter(n => n != node),
       this.edges.filter(edge => edge.target != node),
+      this.start,
     );
   }
 }
 
 function reachable(cfg) {
-  const visited = new Set();
+  var visited = new Set();
   if (!cfg.nodes.includes(cfg.start)) {
     return visited;
   }
@@ -104,24 +98,21 @@ function reachable(cfg) {
 
 function unreachable(cfg) {
   var tmp = new Set(cfg.nodes);
-  for (var node in reachable(cfg)) {
-    tmp.remove(node)
+  for (var node of reachable(cfg)) {
+    tmp.delete(node)
   }
   return tmp;
 }
 
 function buildDominatorTree(cfg) {
-  const tree = {}; // key = node, value = parent
+  // simple but slow algorithm
+  const parentOf = {}; // key = node, value = parent
   for (var node of cfg.postOrder().reverse()) {
     for (var unreachableNode of unreachable(cfg.remove(node))) {
-      console.error(unreachableNode, ' is unreachable after removing', node);
-      
+      parentOf[unreachableNode] = node;
     }
-    //tree[node] = ;
-    
   }
-  console.error(tree)
-  return tree;
+  return parentOf;
 }
 
 module.exports = {
