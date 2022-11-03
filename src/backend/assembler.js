@@ -104,6 +104,23 @@ function unreachable(cfg) {
   return tmp;
 }
 
+class Node {
+  constructor(value, childs) {
+    this.value = value;
+    this.childs = childs;
+  }
+}
+
+function treeFromParents(parentsOf, node) {
+  const childs = [];
+  for (var key in parentsOf) {
+    if (parentsOf[parseInt(key)] == node) {
+      childs.push(treeFromParents(parentsOf, parseInt(key)));
+    }
+  }
+  return new Node(node, childs);
+}
+
 function buildDominatorTree(cfg) {
   // simple but slow algorithm
   const parentOf = {}; // key = node, value = parent
@@ -112,7 +129,7 @@ function buildDominatorTree(cfg) {
       parentOf[unreachableNode] = node;
     }
   }
-  return parentOf;
+  return treeFromParents(parentOf, cfg.start);
 }
 
 module.exports = {
