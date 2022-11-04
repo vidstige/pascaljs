@@ -66,9 +66,19 @@ class ControlFlowGraph {
     // returns the nodes in post-order (dfs)
     return this._postOrder(this.start, new Set());
   }
-  childs(node) {
-    return this.edges.filter(edge => edge.source == node).map(edge => edge.target);
+  outEdges(node) {
+    return this.edges.filter(edge => edge.source == node);
   }
+  childs(node) {
+    this.outEdges(node).map(edge => edge.target);
+  }
+  inEdges(node) {
+    return this.edges.filter(edge => edge.target == node);
+  }
+  parents(node) {
+    return this.inEdges(node).map(edge => edge.source);
+  }
+
   remove(node) {
     return new ControlFlowGraph(
       this.nodes.filter(n => n != node),
@@ -105,28 +115,25 @@ function unreachable(cfg) {
 }
 
 class Node {
-  constructor(value, childs, rpo_number) {
+  constructor(value, childs) {
     this.value = value;
     this.childs = childs;
-    this.rpo_number = rpo_number;
   }
 }
 
-function treeFromParents(parentsOf, node, rpo) {
+function treeFromParents(parentsOf, node) {
   const childs = [];
   for (var key in parentsOf) {
     if (parentsOf[parseInt(key)] == node) {
-      childs.push(treeFromParents(parentsOf, parseInt(key), rpo));
+      childs.push(treeFromParents(parentsOf, parseInt(key)));
     }
   }
-  childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
-  return new Node(node, childs, rpo.indexOf(node));
+  return new Node(node, childs);
 }
 
-function buildDominatorTree(cfg) {
+function buildDominatorTree(cfg, rpo) {
   // simple but slow algorithm O(m^2)
   const parentOf = {}; // key = node, value = parent
-  const rpo = cfg.postOrder().reverse();
   for (var i = 0; i < rpo.length; i++) {
     const node = rpo[i];
     for (var unreachableNode of unreachable(cfg.remove(node))) {
@@ -137,20 +144,41 @@ function buildDominatorTree(cfg) {
   return treeFromParents(parentOf, cfg.start, rpo);
 }
 
-function doTree(node, cfg) {
-  const cfgChilds = cfg.childs(node.value);
-  if (cfgChilds.length == 2) {
-    // assert childs are _only_ reachable from "node"
+function isBack(edge, rpo) {
+  
+}
+
+function doTree(node, cfg, rpo) {
+  // 2. Emit childs
+  const inEdges = cfg.inEdges(node.value);
+  const outEdges = cfg.outEdges(node.value);
+
+  // Detect loop
+  if (inEdges == 1 && isBack(edge, rpo)) {
+    // emit do-while loop and insert doTree(node) inside
+    
   }
+  
+  // Detect if
+  if (cfgChilds.length == 2) {
+    return {
+      statement: 'if',
+      condition: null, // todo
+      then: null,
+      else: null,
+    }
+  }
+
+  //childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
 }
 
 // reduces the assembler statements into ast (containing only structured control flow)
 function reduceControlFlow(statements) {
   console.error(statements)
   const cfg = ControlFlowGraph.build(statements);
-  const domt = buildDominatorTree(cfg);
-  console.error(cfg);
-  doTree(domt, cfg);
+  const rpo = cfg.postOrder().reverse();
+  const domt = buildDominatorTree(cfg, rpo);
+  doTree(domt, cfg, rpo);
 }
 
 module.exports = {
