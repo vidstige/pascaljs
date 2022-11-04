@@ -247,6 +247,10 @@ function doTree(statements, node, cfg, rpo) {
       iast.statements.push(conditional.else);
       conditional.else = null;
     }
+
+    // wrap then and else parts in compound
+    if (conditional.then) conditional.then.statement = 'compound';
+    if (conditional.else) conditional.else.statement = 'compound';
   }
 
   // if this node has one incoming back-edge, it's a loop header
