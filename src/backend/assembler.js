@@ -26,30 +26,28 @@ class ControlFlowGraph {
       }
     }
     
-    // 2. Find all leaders and construct graph
-    var edges = [];
+    // 2. Find all leaders
     var leaders = [0]; // first instruction is always leader
     for (var i = 0; i < statements.length; i++) {
       const statement = statements[i];
-      const node = findNode(leaders, i);
       if (isBranch(statement)) {
         leaders.push(labels[statement.to]);  // branch target is a leader
-        edges.push({source: node, target: labels[statement.to]});
-
         leaders.push(i + 1); // instruction after branch is also a leader
-        edges.push({source: node, target: i + 1});
       }
     }
-    const exit = statements.length;
-    // Add previous => exit if needed
-    /*const previous = findPrevious(leaders, statements.length - 1);
-    if (!edges.includes({source: previous, target: exit})) {
-      edges.push({source: previous, target: exit});
-    }*/
-    
-    //leaders.push(exit);
     leaders.sort(function (a, b) { return a - b; });
-
+  
+    // 3. construct graph (cfg)
+    var edges = [];
+    for (var i = 0; i < statements.length; i++) {
+      const statement = statements[i];
+      if (isBranch(statement)) {
+        const source = findNode(leaders, i);
+        const target = labels[statement.to];
+        edges.push({source: source, target: target});
+        edges.push({source: source, target: i + 1});
+      }
+    }
     return new ControlFlowGraph(leaders, edges);
   }
   _postOrder(node, visited) {
@@ -70,7 +68,7 @@ class ControlFlowGraph {
     return this.edges.filter(edge => edge.source == node);
   }
   childs(node) {
-    this.outEdges(node).map(edge => edge.target);
+    return this.outEdges(node).map(edge => edge.target);
   }
   inEdges(node) {
     return this.edges.filter(edge => edge.target == node);
@@ -156,18 +154,18 @@ function doTree(node, cfg, rpo) {
   // Detect loop
   if (inEdges == 1 && isBack(edge, rpo)) {
     // emit do-while loop and insert doTree(node) inside
-    
+
   }
   
   // Detect if
-  if (cfgChilds.length == 2) {
+  /*if (cfgChilds.length == 2) {
     return {
       statement: 'if',
       condition: null, // todo
       then: null,
       else: null,
     }
-  }
+  }*/
 
   //childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
 }
