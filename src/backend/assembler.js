@@ -152,18 +152,6 @@ function isBack(edge, rpo) {
   return !isForward(edge, rpo);
 }
 
-// get the basic block assembler listing from a node
-function extractBasicBlock(node, cfg, statements) {
-  const start = node.value;
-  const index = cfg.nodes.indexOf(start);
-  var end = index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1];
-  // skip last instruction if branch
-  if (isBranch(statements[end - 1])) {
-    end--;
-  }
-  return statements.slice(start, end);
-}
-
 function translateAssemblerStatement(statement) {
   switch (statement.mnemonic.toLowerCase()) {
     case 'mov':
@@ -202,10 +190,15 @@ function doTree(statements, node, cfg, rpo) {
   const inEdges = cfg.inEdges(node.value);
   const outEdges = cfg.outEdges(node.value);
 
+  // get start and end-instruction
+  const start = node.value;
+  const index = cfg.nodes.indexOf(start);
+  const end = index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1];
+
   // translate the assembler listing of this node into intermediate ast
   const iast = {
     statement: 'statements',
-    statements: translateBlock(extractBasicBlock(node, cfg, statements)),
+    statements: translateBlock(statements.slice(start, isBranch(statements[end - 1]) ? end - 1 : end)),
   };
 
   // if this node has two forward out-edges, it's an if-statement
@@ -214,6 +207,7 @@ function doTree(statements, node, cfg, rpo) {
     // cfg is constructed)
     const then = node.childs.find(child => child.value == outEdges[0].target);
     const els3 = node.childs.find(child => child.value == outEdges[1].target);
+    
     iast.statements.push({
       statement: 'if',
       condition: null, // todo
