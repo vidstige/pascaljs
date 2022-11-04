@@ -7,7 +7,7 @@ function isBranch(statement) {
 }
 
 function findNode(leaders, index) {
-  return Math.min.apply(null, leaders.filter(leader => leader < index));
+  return Math.max.apply(null, leaders.filter(leader => leader <= index));
 }
 
 class ControlFlowGraph {
