@@ -41,7 +41,9 @@ class ControlFlowGraph {
       const statement = statements[i];
       if (isBranch(statement)) {
         leaders.push(labels[statement.to]);  // branch target is a leader
-        leaders.push(i + 1); // instruction after branch is also a leader
+        if (i + 1 < statements.length) {
+          leaders.push(i + 1); // instruction after branch is also a leader (unless last)
+        }
       }
     }
     leaders.sort(function (a, b) { return a - b; });
@@ -54,7 +56,9 @@ class ControlFlowGraph {
         const source = findNode(leaders, i);
         const target = labels[statement.to];
         edges.push({source: source, target: target});
-        edges.push({source: source, target: i + 1});
+        if (i + 1 < statements.length) {
+          edges.push({source: source, target: i + 1});
+        }
         // re-connect branch target with previous instruction (unless start)
         if (target > 0) {
           edges.push({source: findNode(leaders, target - 1), target: target});
@@ -254,9 +258,9 @@ function doTree(statements, node, cfg, rpo) {
   }
 
   // if this node has one incoming back-edge, it's a loop header
-  if (inEdges == 1 && isBack(edge, rpo)) {
+  if (inEdges.length == 1 && isBack(inEdges[0], rpo)) {
     // wrap ast in do-while loop
-    console.error('loop detected');
+    console.error('LOOP detected');
   }
   return iast;
 }
@@ -264,7 +268,6 @@ function doTree(statements, node, cfg, rpo) {
 // reduces the assembler statements into ast (containing only structured control flow)
 function reduceControlFlow(statements) {
   const cfg = ControlFlowGraph.build(statements);
-  console.error(cfg);
   const rpo = cfg.postOrder().reverse();
   const domt = buildDominatorTree(cfg, rpo);
   return doTree(statements, domt, cfg, rpo);
