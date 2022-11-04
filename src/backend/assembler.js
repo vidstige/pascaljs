@@ -152,19 +152,33 @@ function isBack(edge, rpo) {
   return !isForward(edge, rpo);
 }
 
+// get the basic block assembler listing from a node
+function basicBlock(node, cfg, statements) {
+  const start = node.value;
+  const index = cfg.nodes.indexOf(start);
+  const end = index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1];
+  return statements.slice(start, end);
+}
+
 // converts basic block to intermediate ast
 function translate(basicBlock) {
+  console.error('-----')
+  console.error(basicBlock);
 }
 
 // converts dominator tree node into intermediate ast node
-function doTree(node, cfg, rpo) {
+function doTree(statements, node, cfg, rpo) {
   // sort childs by rpo number
   node.childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
 
   const inEdges = cfg.inEdges(node.value);
   const outEdges = cfg.outEdges(node.value);
 
-  var ast = {statement: 'statements', statements: []};
+  // translate the assembler listing of this node into intermediate ast
+  const ast = {
+    statement: 'statements',
+    statements: [translate(basicBlock(node, cfg, statements))],
+  };
 
   // if this node has two forward out-edges, it's an if-statement
   if (outEdges.length == 2 && outEdges.every(edge => isForward(edge, rpo))) {
@@ -172,12 +186,12 @@ function doTree(node, cfg, rpo) {
     // cfg is constructed)
     const then = node.childs.find(child => child.value == outEdges[0].target);
     const els3 = node.childs.find(child => child.value == outEdges[1].target);
-    ast = {
+    ast.statements.push({
       statement: 'if',
       condition: null, // todo
-      then: doTree(then, cfg, rpo),
-      else: doTree(els3, cfg, rpo),
-    }
+      then: doTree(statements, then, cfg, rpo),
+      else: doTree(statements, els3, cfg, rpo),
+    });
   }
 
   // if this node has one incoming back-edge, it's a loop header
@@ -193,7 +207,7 @@ function reduceControlFlow(statements) {
   const cfg = ControlFlowGraph.build(statements);
   const rpo = cfg.postOrder().reverse();
   const domt = buildDominatorTree(cfg, rpo);
-  doTree(domt, cfg, rpo);
+  doTree(statements, domt, cfg, rpo);
 }
 
 module.exports = {
