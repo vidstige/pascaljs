@@ -191,6 +191,15 @@ function translateBlock(assembly_statements) {
   return assembly_statements.map(translateAssemblerStatement);
 }
 
+function isMerge(node, cfg) {
+  return cfg.inEdges(node.value).length > 1;
+}
+
+// inverts an intermeidate ast expression
+function invert(expression) {
+  return {expression: 'unary', operator: '!', operand: expression};
+}
+
 // converts dominator tree node into intermediate ast node
 function doTree(statements, node, cfg, rpo) {
   // sort childs by rpo number
@@ -216,12 +225,28 @@ function doTree(statements, node, cfg, rpo) {
     // cfg is constructed)
     const then = node.childs.find(child => child.value == outEdges[0].target);
     const els3 = node.childs.find(child => child.value == outEdges[1].target);
-    iast.statements.push({
+
+    conditional = {
       statement: 'if',
       condition: branchCondition(statements[end - 1]),
       then: doTree(statements, then, cfg, rpo),
       else: doTree(statements, els3, cfg, rpo),
-    });
+    };
+
+    iast.statements.push(conditional);
+
+    if (isMerge(then, cfg)) {
+      // the then-part cannot be empty - invert condition and swap then with else
+      iast.statements.push(conditional.then);  // put the then-part after the if
+      conditional.condition = invert(conditional.condition);  // invert condition
+      conditional.then = conditional.else;  // swap the then and else parts
+      conditional.else = null;
+      
+    }
+    if (isMerge(els3, cfg)) {
+      iast.statements.push(conditional.else);
+      conditional.else = null;
+    }
   }
 
   // if this node has one incoming back-edge, it's a loop header
@@ -235,6 +260,7 @@ function doTree(statements, node, cfg, rpo) {
 // reduces the assembler statements into ast (containing only structured control flow)
 function reduceControlFlow(statements) {
   const cfg = ControlFlowGraph.build(statements);
+  console.error(cfg);
   const rpo = cfg.postOrder().reverse();
   const domt = buildDominatorTree(cfg, rpo);
   return doTree(statements, domt, cfg, rpo);
