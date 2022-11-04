@@ -156,7 +156,11 @@ function isBack(edge, rpo) {
 function extractBasicBlock(node, cfg, statements) {
   const start = node.value;
   const index = cfg.nodes.indexOf(start);
-  const end = index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1];
+  var end = index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1];
+  // skip last instruction if branch
+  if (isBranch(statements[end - 1])) {
+    end--;
+  }
   return statements.slice(start, end);
 }
 
@@ -177,7 +181,7 @@ function translateAssemblerStatement(statement) {
     case 'cmp':
       return {
         statement: 'assignment',
-        to: '__register.flags',
+        to: '__registers.flags',
         from: {expression: 'binary', lhs: statement.b, operator: '-', rhs: statement.a},
       };
     default:
