@@ -142,36 +142,49 @@ function buildDominatorTree(cfg, rpo) {
       parentOf[unreachableNode] = node;
     }
   }
-  console.error(parentOf)
   return treeFromParents(parentOf, cfg.start, rpo);
 }
 
+function isForward(edge, rpo) {
+  return rpo.indexOf(edge.source) < rpo.indexOf(edge.target);
+}
 function isBack(edge, rpo) {
-  
+  return !isForward(edge, rpo);
 }
 
+// converts basic block to intermediate ast
+function translate(basicBlock) {
+}
+
+// converts dominator tree node into intermediate ast node
 function doTree(node, cfg, rpo) {
-  // 2. Emit childs
+  // sort childs by rpo number
+  node.childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
+
   const inEdges = cfg.inEdges(node.value);
   const outEdges = cfg.outEdges(node.value);
 
-  // Detect loop
-  if (inEdges == 1 && isBack(edge, rpo)) {
-    // emit do-while loop and insert doTree(node) inside
+  var ast = {statement: 'statements', statements: []};
 
-  }
-  
-  // Detect if
-  /*if (cfgChilds.length == 2) {
-    return {
+  // if this node has two forward out-edges, it's an if-statement
+  if (outEdges.length == 2 && outEdges.every(edge => isForward(edge, rpo))) {
+    // find the out-edges in childs (the if-true part always comes first, because of how the
+    // cfg is constructed)
+    const then = node.childs.find(child => child.value == outEdges[0].target);
+    const els3 = node.childs.find(child => child.value == outEdges[1].target);
+    ast = {
       statement: 'if',
       condition: null, // todo
-      then: null,
-      else: null,
+      then: doTree(then, cfg, rpo),
+      else: doTree(els3, cfg, rpo),
     }
-  }*/
+  }
 
-  //childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
+  // if this node has one incoming back-edge, it's a loop header
+  if (inEdges == 1 && isBack(edge, rpo)) {
+    // wrap ast in do-while loop
+    console.error('loop detected');
+  }
 }
 
 // reduces the assembler statements into ast (containing only structured control flow)
