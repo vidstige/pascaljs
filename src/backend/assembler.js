@@ -6,6 +6,15 @@ function isBranch(statement) {
   return branchMnemonics.includes(statement.mnemonic);
 }
 
+function branchCondition(statement) {
+  switch (statement.mnemonic) {
+    case 'jne':
+      return '__registers.flags';
+    default:
+      throw "Unknown branch mnemonic " + statement.mnemonic;
+  }
+}
+
 function findNode(leaders, index) {
   return Math.max.apply(null, leaders.filter(leader => leader <= index));
 }
@@ -207,10 +216,9 @@ function doTree(statements, node, cfg, rpo) {
     // cfg is constructed)
     const then = node.childs.find(child => child.value == outEdges[0].target);
     const els3 = node.childs.find(child => child.value == outEdges[1].target);
-    
     iast.statements.push({
       statement: 'if',
-      condition: null, // todo
+      condition: branchCondition(statements[end - 1]),
       then: doTree(statements, then, cfg, rpo),
       else: doTree(statements, els3, cfg, rpo),
     });
@@ -226,7 +234,6 @@ function doTree(statements, node, cfg, rpo) {
 
 // reduces the assembler statements into ast (containing only structured control flow)
 function reduceControlFlow(statements) {
-  console.error(statements)
   const cfg = ControlFlowGraph.build(statements);
   const rpo = cfg.postOrder().reverse();
   const domt = buildDominatorTree(cfg, rpo);
