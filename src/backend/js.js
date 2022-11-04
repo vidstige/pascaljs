@@ -163,7 +163,7 @@ function Emitter(config) {
         break;
       case 'assignment_with':
         // TODO: if op is + and format_expression(stmt.from) is 1. Use ++. Same with -
-        this.emit_raw(format_expression(stmt.to) + stmt.operator +  "= " + format_expression(stmt.from) + ";");
+        this.emit_raw(format_expression(stmt.to) + " " + stmt.operator +  "= " + format_expression(stmt.from) + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
