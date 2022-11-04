@@ -46,6 +46,10 @@ class ControlFlowGraph {
         const target = labels[statement.to];
         edges.push({source: source, target: target});
         edges.push({source: source, target: i + 1});
+        // re-connect branch target with previous instruction (unless start)
+        if (target > 0) {
+          edges.push({source: findNode(leaders, target - 1), target: target});
+        }
       }
     }
     return new ControlFlowGraph(leaders, edges);
