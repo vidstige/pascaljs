@@ -126,6 +126,9 @@ function Emitter(config) {
         this.emit_statements(stmt.statements);
         indentation--; this.emit_raw('}');
         break;
+      case 'statements':
+        this.emit_statements(stmt.statements);
+        break;
       case 'call':
         // Find boxes
         const f = callables[stmt.target];
@@ -157,6 +160,10 @@ function Emitter(config) {
         break;
       case 'assignment':
         this._emit_assignment(stmt);
+        break;
+      case 'assignment_with':
+        // TODO: if op is + and format_expression(stmt.from) is 1. Use ++. Same with -
+        this.emit_raw(format_expression(stmt.to) + stmt.operator +  "= " + format_expression(stmt.from) + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
@@ -197,43 +204,12 @@ function Emitter(config) {
         break;
       case 'assembly_block':
         const ast = assembler.reduceControlFlow(stmt.statements);
-        //this.emit_statements(reduced);
-        this._emit_assembler(stmt.statements);
+        this.emit_statement(ast);
         break;
       default:
         throw "Unknown statement: " + stmt.statement;
     }
   }
-  this._emit_assembler = function(assembly_statements) {
-    for (var i = 0; i < assembly_statements.length; i++) {
-      const statement = assembly_statements[i];
-      switch (statement.mnemonic.toLowerCase()) {
-        case 'mov':
-          this.emit_raw(format_expression(statement.target) + " = " + format_expression(statement.source) + ";");
-          break;
-        case 'dec':
-          this.emit_raw(format_expression(statement.target) + "--;");
-          break;
-        case 'inc':
-          this.emit_raw(format_expression(statement.target) + "++;");
-          break;
-        case 'sub':
-          this.emit_raw(format_expression(statement.target) + " -= " + format_expression(statement.operand) + ";");
-          break
-        case 'add':
-          this.emit_raw(format_expression(statement.target) + " += " + format_expression(statement.operand) + ";");
-          break
-        case 'xor':
-          this.emit_raw(format_expression(statement.target) + " ^= " + format_expression(statement.operand) + ";");
-          break;
-        case 'cmp':
-          this.emit_raw('__register.flags = ' + format_expression(statement.a) + " - " + format_expression(statement.b) + ";");
-          break;
-        default:
-          throw "Unknown mnemonic: " + statement.mnemonic;
-      }
-    }
-  };
 
   this.emit_statements = function(statements) {
     for (var i = 0; i < statements.length; i++)

@@ -153,17 +153,41 @@ function isBack(edge, rpo) {
 }
 
 // get the basic block assembler listing from a node
-function basicBlock(node, cfg, statements) {
+function extractBasicBlock(node, cfg, statements) {
   const start = node.value;
   const index = cfg.nodes.indexOf(start);
   const end = index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1];
   return statements.slice(start, end);
 }
 
+function translateAssemblerStatement(statement) {
+  switch (statement.mnemonic.toLowerCase()) {
+    case 'mov':
+      return {statement: 'assignment', to: statement.target, from: statement.source};
+    case 'inc':
+      return {statement: 'assignment_with', to: statement.target, operator: '+', from: 1};
+    case 'dec':
+      return {statement: 'assignment_with', to: statement.target, operator: '-', from: 1};
+    case 'add':
+      return {statement: 'assignment_with', to: statement.target, operator: '+', from: statement.operand};  
+    case 'sub':
+      return {statement: 'assignment_with', to: statement.target, operator: '-', from: statement.operand};
+    case 'xor':
+      return {statement: 'assignment_with', to: statement.target, operator: '^', from: statement.operand};
+    case 'cmp':
+      return {
+        statement: 'assignment',
+        to: '__register.flags',
+        from: {expression: 'binary', lhs: statement.b, operator: '-', rhs: statement.a},
+      };
+    default:
+      throw "Unknown mnemonic: " + statement.mnemonic;
+  }
+}
+
 // converts basic block to intermediate ast
-function translate(basicBlock) {
-  console.error('-----')
-  console.error(basicBlock);
+function translateBlock(assembly_statements) {
+  return assembly_statements.map(translateAssemblerStatement);
 }
 
 // converts dominator tree node into intermediate ast node
@@ -175,9 +199,9 @@ function doTree(statements, node, cfg, rpo) {
   const outEdges = cfg.outEdges(node.value);
 
   // translate the assembler listing of this node into intermediate ast
-  const ast = {
+  const iast = {
     statement: 'statements',
-    statements: [translate(basicBlock(node, cfg, statements))],
+    statements: translateBlock(extractBasicBlock(node, cfg, statements)),
   };
 
   // if this node has two forward out-edges, it's an if-statement
@@ -186,7 +210,7 @@ function doTree(statements, node, cfg, rpo) {
     // cfg is constructed)
     const then = node.childs.find(child => child.value == outEdges[0].target);
     const els3 = node.childs.find(child => child.value == outEdges[1].target);
-    ast.statements.push({
+    iast.statements.push({
       statement: 'if',
       condition: null, // todo
       then: doTree(statements, then, cfg, rpo),
@@ -199,6 +223,7 @@ function doTree(statements, node, cfg, rpo) {
     // wrap ast in do-while loop
     console.error('loop detected');
   }
+  return iast;
 }
 
 // reduces the assembler statements into ast (containing only structured control flow)
@@ -207,7 +232,7 @@ function reduceControlFlow(statements) {
   const cfg = ControlFlowGraph.build(statements);
   const rpo = cfg.postOrder().reverse();
   const domt = buildDominatorTree(cfg, rpo);
-  doTree(statements, domt, cfg, rpo);
+  return doTree(statements, domt, cfg, rpo);
 }
 
 module.exports = {
