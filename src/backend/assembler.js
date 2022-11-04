@@ -105,35 +105,55 @@ function unreachable(cfg) {
 }
 
 class Node {
-  constructor(value, childs) {
+  constructor(value, childs, rpo_number) {
     this.value = value;
     this.childs = childs;
+    this.rpo_number = rpo_number;
   }
 }
 
-function treeFromParents(parentsOf, node) {
+function treeFromParents(parentsOf, node, rpo) {
   const childs = [];
   for (var key in parentsOf) {
     if (parentsOf[parseInt(key)] == node) {
-      childs.push(treeFromParents(parentsOf, parseInt(key)));
+      childs.push(treeFromParents(parentsOf, parseInt(key), rpo));
     }
   }
-  return new Node(node, childs);
+  childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
+  return new Node(node, childs, rpo.indexOf(node));
 }
 
 function buildDominatorTree(cfg) {
-  // simple but slow algorithm
+  // simple but slow algorithm O(m^2)
   const parentOf = {}; // key = node, value = parent
-  for (var node of cfg.postOrder().reverse()) {
+  const rpo = cfg.postOrder().reverse();
+  for (var i = 0; i < rpo.length; i++) {
+    const node = rpo[i];
     for (var unreachableNode of unreachable(cfg.remove(node))) {
       parentOf[unreachableNode] = node;
     }
   }
-  return treeFromParents(parentOf, cfg.start);
+  console.error(parentOf)
+  return treeFromParents(parentOf, cfg.start, rpo);
+}
+
+function doTree(node, cfg) {
+  const cfgChilds = cfg.childs(node.value);
+  if (cfgChilds.length == 2) {
+    // assert childs are _only_ reachable from "node"
+  }
+}
+
+// reduces the assembler statements into ast (containing only structured control flow)
+function reduceControlFlow(statements) {
+  console.error(statements)
+  const cfg = ControlFlowGraph.build(statements);
+  const domt = buildDominatorTree(cfg);
+  console.error(cfg);
+  doTree(domt, cfg);
 }
 
 module.exports = {
-  ControlFlowGraph: ControlFlowGraph,
-  buildDominatorTree: buildDominatorTree,
+  reduceControlFlow: reduceControlFlow,
 };
   
