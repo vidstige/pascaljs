@@ -328,7 +328,8 @@ function Emitter(config) {
   this.emit_node = function(node) {
     stack_push(variables);
     this.emit_declarations(node.declarations);
-    this.emit_statements(node.statements);
+
+    this.emit_statement(node.block);
     stack_pop(variables);
   }
 
