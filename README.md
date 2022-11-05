@@ -2,7 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/circleci/circleci-docs.svg?style=svg)](https://circleci.com/gh/vidstige/pascaljs)
 
-[![first-timers-friendly](http://img.shields.io/badge/first--timers--only-friendly-green.svg?style=flat&colorB=FF69B4)](http://www.firsttimersonly.com/)
+[![first-timers-friendly](https://img.shields.io/badge/first--timers--only-friendly-green.svg?style=flat&colorB=FF69B4)](http://www.firsttimersonly.com/)
 
 Pascal parser in js. The goal is to be able to run simple Turbo Pascal demos
 made in the 90s that depend on asm, but otherwise very simple pascal.
