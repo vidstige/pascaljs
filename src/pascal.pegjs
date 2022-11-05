@@ -60,7 +60,7 @@ uses
   = "uses" _ first:identifier rest:("," _ identifier)* ";" _ { return {uses: [first].concat(nth(rest, 2))}; }
 
 construct
-  = d:declarations block:block { return {declarations: d, statements: block.statements}; }
+  = d:declarations block:block { return {declarations: d, block: block}; }
 
 statements
   = all:(statement ";" _)*  { return nth(all, 0); }
@@ -74,6 +74,9 @@ declaration_part
 // ASSEMBLER
 assembly_block
   = "asm" _ as:assembly_statements _ "end" { return {statement: 'assembly_block', statements: as}; }
+
+assembly_construct
+  = d:declarations block:assembly_block { return {declarations: d, block: block}; }
 
 // TODO: the '__registers' symbol should not be in the ast
 assembly_register
