@@ -258,7 +258,7 @@ function Emitter(config) {
         stack_insert(_symbol_map, argument.name, argument.name + '.value');
       }
     }
-    this.emit_node(p.block);
+    this.emit_node(p.construct);
     stack_pop(_symbol_map);
     indentation--; this.emit_raw("}");
   }
@@ -270,7 +270,7 @@ function Emitter(config) {
     const result_name = '_result';
     stack_insert(_symbol_map, f.function, result_name);
     this.emit_variable({'name': result_name, 'type': f.return_type});
-    this.emit_node(f.block);
+    this.emit_node(f.construct);
     stack_pop(_symbol_map);
     this.emit_raw('return ' + result_name + ";");
     

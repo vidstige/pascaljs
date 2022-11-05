@@ -51,7 +51,7 @@ start =
   program / unit
 
 program
-  = "program" __ name:identifier ";" _ root:block "."  { return {program: root, name: name}; }
+  = "program" __ name:identifier ";" _ root:construct "."  { return {program: root, name: name}; }
 
 unit
   = "unit" __ name:identifier ";" _ "interface" _ the_interface:interface_part _ "implementation" _ the_implementation:implementation_part _ "end" "." { return {'unit': {'interface': the_interface, 'implementation': the_implementation}, 'name': name}; }
@@ -59,7 +59,7 @@ unit
 uses
   = "uses" _ first:identifier rest:("," _ identifier)* ";" _ { return {uses: [first].concat(nth(rest, 2))}; }
 
-block
+construct
   = d:declarations "begin" _ s:statements _ "end" { return {declarations: d, statements: s}; }
 
 statements
@@ -119,14 +119,14 @@ procedure_header
   / "procedure" _ name:identifier _ ";" _ { return {name: name, args: []}; }
 
 procedure_declaration 
-  = head:procedure_header _ block:block ";" _ { return {procedure: head.name, arguments: head.args, block: block}; }
+  = head:procedure_header _ construct:construct ";" _ { return {procedure: head.name, arguments: head.args, construct: construct}; }
 
 function_header
   = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" _ { return {name: name, args: args, return_type: return_type}; }
   / "function" _ name:identifier _ ":" _ return_type:type _ ";" _ { return {name: name, args: [], return_type: return_type}; }
 
 function_declaration 
-  = head:function_header _ block:block ";" _ { return {function: head.name, arguments: head.args, block: block, return_type: head.return_type}; }
+  = head:function_header _ construct:construct ";" _ { return {function: head.name, arguments: head.args, construct: construct, return_type: head.return_type}; }
 
 argument_list_declaration
   = first:argument_declaration? rest:(";" _ argument_declaration)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }
