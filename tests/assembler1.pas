@@ -4,7 +4,7 @@ var
     x: Word;
 begin
     asm
-        mov 17, x
+        mov x, 17
         inc x
         add x, 5
         sub x, 10

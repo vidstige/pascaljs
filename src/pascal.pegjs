@@ -99,7 +99,7 @@ labeled_assembly_statement
   }
 
 assembly_statement
-  = "mov" _ source:assembly_expression _ "," _ target:assembly_lvalue { return {mnemonic: 'mov', source: source, target: target}; }
+  = "mov" _ target:assembly_lvalue _ "," _ source:assembly_expression { return {mnemonic: 'mov', source: source, target: target}; }
   / "dec" _ target:assembly_lvalue { return {mnemonic: 'dec', target: target}; }
   / "inc" _ target:assembly_lvalue { return {mnemonic: 'inc', target: target}; }
   / "sub" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'sub', target: target, operand: operand}; }
