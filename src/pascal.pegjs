@@ -75,8 +75,9 @@ declaration_part
 assembly_block
   = "asm" _ as:assembly_statements _ "end" { return {statement: 'assembly_block', statements: as}; }
 
+// TODO: the '__registers' symbol should not be in the ast
 assembly_register
-  = "ax" / "bx" / "cx" / "dx" / "ds" / "es" / "di" / "si"
+  = ("ax" / "bx" / "cx" / "dx" / "ds" / "es" / "di" / "si") { return '__registers.' + text(); }
 
 assembly_lvalue = assembly_register / lvalue
 

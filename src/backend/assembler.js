@@ -11,7 +11,7 @@ function branchCondition(statement) {
     case 'jne':
       return '__registers.flags';
     case 'loop':
-      return '--__registers.cx != 0';
+      return '--__registers.cx == 0'; // inverted because emitted as repeat-until
     default:
       throw "Unknown branch mnemonic " + statement.mnemonic;
   }
