@@ -60,7 +60,7 @@ uses
   = "uses" _ first:identifier rest:("," _ identifier)* ";" _ { return {uses: [first].concat(nth(rest, 2))}; }
 
 construct
-  = d:declarations "begin" _ s:statements _ "end" { return {declarations: d, statements: s}; }
+  = d:declarations block:block { return {declarations: d, statements: block.statements}; }
 
 statements
   = all:(statement ";" _)*  { return nth(all, 0); }
