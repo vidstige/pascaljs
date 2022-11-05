@@ -1,4 +1,2 @@
-__registers = {
-    flags: 0,
-}
+var __registers = {};
 function WriteLn() { console.log(Array.prototype.slice.call(arguments).join('')); }
