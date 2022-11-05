@@ -80,6 +80,8 @@ assembly_register
 
 assembly_lvalue = assembly_register / lvalue
 
+assembly_expression = assembly_register / literal / lvalue
+
 newline = '\n' / '\r' '\n'?
 
 assembly_statements = all:(labeled_assembly_statement _)*  { return nth(all, 0); }
@@ -93,13 +95,13 @@ labeled_assembly_statement
   }
 
 assembly_statement
-  = "mov" _ source:expression _ "," _ target:assembly_lvalue { return {mnemonic: 'mov', source: source, target: target}; }
+  = "mov" _ source:assembly_expression _ "," _ target:assembly_lvalue { return {mnemonic: 'mov', source: source, target: target}; }
   / "dec" _ target:assembly_lvalue { return {mnemonic: 'dec', target: target}; }
   / "inc" _ target:assembly_lvalue { return {mnemonic: 'inc', target: target}; }
-  / "sub" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'sub', target: target, operand: operand}; }
-  / "add" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'add', target: target, operand: operand}; }
-  / "xor" _ target:assembly_lvalue _ "," _ operand:expression { return {mnemonic: 'xor', target: target, operand: operand}; }
-  / "cmp" _ a:assembly_lvalue _ "," _ b:expression { return {mnemonic: 'cmp', a: a, b: b}; }
+  / "sub" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'sub', target: target, operand: operand}; }
+  / "add" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'add', target: target, operand: operand}; }
+  / "xor" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'xor', target: target, operand: operand}; }
+  / "cmp" _ a:assembly_lvalue _ "," _ b:assembly_expression { return {mnemonic: 'cmp', a: a, b: b}; }
   / "jne" _ label:assembly_label { return {mnemonic: 'jne', to: label}; }
   / "loop" _ label:assembly_label { return {mnemonic: 'loop', to: label}; }
 
