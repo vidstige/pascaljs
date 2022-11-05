@@ -4,7 +4,7 @@ var
 begin
     asm
         xor x, x
-        mov 10, cx
+        mov cx, 10
     @loop:
         add x, 3
         loop @loop
