@@ -9,6 +9,6 @@
   "author": "vidstige <samuel.carlsson@gmail.com>",
   "license": "ISC",
   "devDependencies": {
-    "pegjs": "^0.10.0"
+    "peggy": "^2.0.1"
   }
 }

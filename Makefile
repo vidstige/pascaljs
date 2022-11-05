@@ -1,13 +1,8 @@
-pegjs = node_modules/pegjs/bin/pegjs
-
 SRCS=$(wildcard tests/*.pas)
 VERIFICATION=$(patsubst tests/%.pas,verify/%,$(SRCS))
 
-$(pegjs):
-	npm install
-
 src/pascal.js: src/pascal.pegjs $(pegjs)
-	$(pegjs) src/pascal.pegjs
+	npx peggy src/pascal.pegjs
 
 tests/actual/%.out: export NODE_PATH=build/
 tests/actual/%.out: build/%.js
