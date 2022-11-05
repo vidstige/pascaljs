@@ -10,6 +10,8 @@ function branchCondition(statement) {
   switch (statement.mnemonic) {
     case 'jne':
       return '__registers.flags';
+    case 'loop':
+      return '--__registers.cx != 0';
     default:
       throw "Unknown branch mnemonic " + statement.mnemonic;
   }
@@ -161,6 +163,7 @@ function buildDominatorTree(cfg, rpo) {
 function isForward(edge, rpo) {
   return rpo.indexOf(edge.source) < rpo.indexOf(edge.target);
 }
+
 function isBack(edge, rpo) {
   return !isForward(edge, rpo);
 }
@@ -204,24 +207,28 @@ function invert(expression) {
   return {expression: 'unary', operator: '!', operand: expression};
 }
 
+function getBlockEnd(start, cfg, statements) {
+  const index = cfg.nodes.indexOf(start);
+  return index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1]
+}
+
 // converts dominator tree node into intermediate ast node
 function doTree(statements, node, cfg, rpo) {
-  // sort childs by rpo number
-  node.childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
-
   const inEdges = cfg.inEdges(node.value);
   const outEdges = cfg.outEdges(node.value);
 
+  // 1. translate this node
   // get start and end-instruction
   const start = node.value;
-  const index = cfg.nodes.indexOf(start);
-  const end = index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1];
+  const end = getBlockEnd(start, cfg, statements);
 
   // translate the assembler listing of this node into intermediate ast
   const iast = {
     statement: 'statements',
     statements: translateBlock(statements.slice(start, isBranch(statements[end - 1]) ? end - 1 : end)),
   };
+
+  const handled = new Set(); // keep track of childs handled
 
   // if this node has two forward out-edges, it's an if-statement
   if (outEdges.length == 2 && outEdges.every(edge => isForward(edge, rpo))) {
@@ -245,7 +252,6 @@ function doTree(statements, node, cfg, rpo) {
       conditional.condition = invert(conditional.condition);  // invert condition
       conditional.then = conditional.else;  // swap the then and else parts
       conditional.else = null;
-      
     }
     if (isMerge(els3, cfg)) {
       iast.statements.push(conditional.else);
@@ -255,13 +261,39 @@ function doTree(statements, node, cfg, rpo) {
     // wrap then and else parts in compound
     if (conditional.then) conditional.then.statement = 'compound';
     if (conditional.else) conditional.else.statement = 'compound';
+
+    // don't concat these childs
+    handled.add(then);
+    handled.add(els3);
+  }
+
+  // 2. translate all childs and append them
+  // sort childs by rpo number
+  node.childs.sort((a, b) => rpo.indexOf(b) - rpo.indexOf(a));
+  for (var child of node.childs) {
+    if (handled.has(child)) continue;  // skip childs included if (if any)
+    const child_ast = doTree(statements, child, cfg, rpo);
+    if (child_ast.statement == 'statements') {
+      for (var statement of child_ast.statements) {
+        iast.statements.push(statement);
+      }
+    } else {
+      iast.statements.push(child_ast);
+    }
   }
 
   // if this node has one incoming back-edge, it's a loop header
-  if (inEdges.length == 1 && isBack(inEdges[0], rpo)) {
+  const backEdges = inEdges.filter(edge => isBack(edge, rpo));
+  if (backEdges.length > 0) {
+    const sourceEnd = getBlockEnd(backEdges[0].source, cfg, statements);
     // wrap ast in do-while loop
-    console.error('LOOP detected');
+    return {
+      statement: 'repeat',
+      condition: branchCondition(statements[sourceEnd - 1]),
+      statements: iast.statements,
+    }
   }
+
   return iast;
 }
 
