@@ -186,10 +186,10 @@ type "type"
 
 // STATEMENTS
 statement
-  = compound / assembly_block / procedure_call / assignment / if_else / if / for / while / repeat / with
+  = block / assembly_block / procedure_call / assignment / if_else / if / for / while / repeat / with
 
-compound
-  = "begin" _ stmts:statements _ "end" { return {statement: 'compound', statements: stmts}; }
+block
+  = "begin" _ stmts:statements _ "end" { return {statement: 'block', statements: stmts}; }
 
 assignment
   = lvalue:lvalue _ ":=" _ value:expression { return {statement: 'assignment', to: lvalue, from: value}; }
