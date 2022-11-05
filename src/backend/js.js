@@ -121,7 +121,7 @@ function Emitter(config) {
 
   this.emit_statement = function(stmt) {
     switch (stmt.statement) {
-      case 'compound':
+      case 'block':
         this.emit_raw('{'); indentation++;
         this.emit_statements(stmt.statements);
         indentation--; this.emit_raw('}');

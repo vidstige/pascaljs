@@ -258,9 +258,9 @@ function doTree(statements, node, cfg, rpo) {
       conditional.else = null;
     }
 
-    // wrap then and else parts in compound
-    if (conditional.then) conditional.then.statement = 'compound';
-    if (conditional.else) conditional.else.statement = 'compound';
+    // wrap then and else parts in blocks
+    if (conditional.then) conditional.then.statement = 'block';
+    if (conditional.else) conditional.else.statement = 'block';
 
     // don't concat these childs
     handled.add(then);
