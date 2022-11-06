@@ -9,6 +9,7 @@ function isBranch(statement) {
 function branchCondition(statement) {
   switch (statement.mnemonic) {
     case 'jne':
+    case 'jnz':
       return '__registers.flags';
     case 'loop':
       return '--__registers.cx == 0'; // inverted because emitted as repeat-until
@@ -182,6 +183,8 @@ function translateAssemblerStatement(statement) {
       return {statement: 'assignment_with', to: statement.target, operator: '-', from: statement.operand};
     case 'xor':
       return {statement: 'assignment_with', to: statement.target, operator: '^', from: statement.operand};
+    case 'shr':
+      return {statement: 'assignment_with', to: statement.target, operator: '>>', from: statement.operand};
     case 'cmp':
       return {
         statement: 'assignment',
