@@ -198,7 +198,7 @@ type "type"
 
 // STATEMENTS
 statement
-  = block / assembly_block / procedure_call / assignment / if_else / if / for / while / repeat / with
+  = block / assembly_block / assignment / if_else / if / for / while / repeat / with / procedure_call
 
 block
   = "begin" _ stmts:statements _ "end" { return {statement: 'block', statements: stmts}; }
@@ -220,6 +220,7 @@ array_access
 
 procedure_call
   = procedure:identifier _ "(" args:argument_list ")"  { return {statement: 'call', target: procedure, arguments: args}; }
+  / procedure:identifier { return {statement: 'call', target: procedure, arguments: []}; }
 
 argument_list
   = first:argument? rest:("," _ argument)* { return [first].concat(nth(rest, 2)); }
@@ -292,8 +293,11 @@ pointer_to
 deref
   = ptr:identifier "^" { return "eval(" + ptr + "['pointer']" + ")"; }
 
+keyword
+  = "begin" / "end"
+
 identifier "identifier"
-   = [A-Za-z][A-Za-z0-9_]* { return text(); } 
+   = !keyword [A-Za-z][A-Za-z0-9_]* { return text(); } 
 
 // LITERALS
 
