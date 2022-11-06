@@ -82,9 +82,12 @@ assembly_construct
 assembly_register
   = ("ax" / "bx" / "cx" / "dx" / "ds" / "es" / "di" / "si") { return '__registers.' + text(); }
 
-assembly_lvalue = assembly_register / lvalue
+assembly_memory
+  = segment:assembly_register ":" "[" assembly_register (operand:("+" / "-") offset:integer_literal)? "]"
 
-assembly_expression = assembly_register / literal / lvalue
+assembly_lvalue = assembly_register / identifier
+
+assembly_expression = assembly_memory / assembly_register / integer_literal / assembly_lvalue
 
 newline = '\n' / '\r' '\n'?
 
