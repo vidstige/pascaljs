@@ -250,10 +250,12 @@ function_call "function call"
   = func:identifier _ "(" args:argument_list ")"  { return {expression: 'call', func: func, args: args}; }
 
 expression "expression"
-  = negation / comparision / or_expr
+  = unary / comparision / or_expr
 
-negation
-  = "not" _ expression:expression { return {expression: 'unary', operator: 'not', operand: expression}; }
+unary_operator = "not" / "-"
+
+unary
+  = operator:unary_operator _ expression:expression { return {expression: 'unary', operator: operator, operand: expression}; }
 
 comparision
   = a:or_expr _ "=" _ b:or_expr { return {expression: 'binary', operator: '==', lhs: a, rhs: b}; }
