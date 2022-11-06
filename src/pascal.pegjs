@@ -109,9 +109,10 @@ assembly_statement
   / "add" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'add', target: target, operand: operand}; }
   / "xor" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'xor', target: target, operand: operand}; }
   / "shr" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'shr', target: target, operand: operand}; }
+  / "cmp" _ a:assembly_lvalue _ "," _ b:assembly_expression { return {mnemonic: 'cmp', a: a, b: b}; }
   / "push" _ operand:assembly_expression 
   / "pop" _ operand:assembly_expression 
-  / "cmp" _ a:assembly_lvalue _ "," _ b:assembly_expression { return {mnemonic: 'cmp', a: a, b: b}; }
+  / "les" _ target:assembly_lvalue _ "," _ source:assembly_expression { return {mnemonic: 'les', target: target, source: source}; }
   / "jne" _ label:assembly_label { return {mnemonic: 'jne', to: label}; }
   / "jnz" _ label:assembly_label { return {mnemonic: 'jnz', to: label}; }
   / "loop" _ label:assembly_label { return {mnemonic: 'loop', to: label}; }
@@ -190,7 +191,7 @@ var_declaration
 // TODO: Allow const ints for bounds
 // TODO: Return proper ast for array types.
 type "type"
-  = "array" _ "[" low:integer_literal _ ".." _ high:integer_literal _ "]" _ "of" _ type:type { return {kind: 'array', range: {low: low, high: high}, of: type}; }
+  = "array" _ "[" low:expression _ ".." _ high:expression _ "]" _ "of" _ type:type { return {kind: 'array', range: {low: low, high: high}, of: type}; }
   / "record" __ members:argument_list_declaration _ ";"? _ "end" { return {kind: 'record', members: members}; }
   / "^" to:type { return {kind: 'pointer', to: to}}
   / type_name:identifier { return findType(type_name); }
