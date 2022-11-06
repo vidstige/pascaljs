@@ -123,6 +123,7 @@ procedure_header
 
 procedure_declaration 
   = head:procedure_header _ construct:construct ";" _ { return {procedure: head.name, arguments: head.args, construct: construct}; }
+  / head:procedure_header _ "assembler" _ ";" _ construct:assembly_construct ";" _ { return {procedure: head.name, arguments: head.args, construct: construct}; }
 
 function_header
   = "function" _ name:identifier "(" args:argument_list_declaration ")" _ ":" _ return_type:type ";" _ { return {name: name, args: args, return_type: return_type}; }
