@@ -6,3 +6,6 @@ src/emit.js
 /tests/actual/
 
 yarn-error.log
+
+# mac debris
+.DS_Store
