@@ -85,9 +85,9 @@ assembly_register
 assembly_memory
   = segment:assembly_register ":" "[" assembly_register (operand:("+" / "-") offset:integer_literal)? "]"
 
-assembly_lvalue = assembly_register / identifier
+assembly_lvalue = assembly_memory / assembly_register / identifier
 
-assembly_expression = assembly_memory / assembly_register / integer_literal / assembly_lvalue
+assembly_expression = assembly_lvalue / assembly_register / integer_literal
 
 newline = '\n' / '\r' '\n'?
 
