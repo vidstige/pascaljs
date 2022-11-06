@@ -224,11 +224,9 @@ function Emitter(config) {
 
   this.emit_constants = function(constants) {
     var c = constants;
-    if (c) {
-      for (var i = 0; i < c.length; i++)
-      {
-        this.emit_raw('const ' + c[i].name + ' = ' + c[i].value + ';');
-      }
+    for (var i = 0; i < c.length; i++)
+    {
+      this.emit_raw('const ' + c[i].name + ' = ' + c[i].value + ';');
     }
   }
 
