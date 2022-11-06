@@ -13,4 +13,5 @@ begin
   r := simple(true, false);
   WriteLn('A or B ', r);
   WriteLn('NoParameters() ', NoParameters());
+  WriteLn('NoParameters, no parenthesis ', NoParameters);
 end.

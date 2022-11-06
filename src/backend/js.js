@@ -112,6 +112,11 @@ function Emitter(config) {
     if (expression.expression == 'array_access') {
       return format_expression(expression.lvalue) + '[' + format_expression(expression.indexer) + ']';
     }
+    // handle function calls without parenthesis
+    const f = find(_function_map, expression, null);
+    if (f !== null) {
+      return f + "()";
+    }
     return symbol(expression);
   }
 
@@ -274,6 +279,8 @@ function Emitter(config) {
     
     indentation--;
     this.emit_raw("}");
+
+    stack_insert(_function_map, f.function, f.function);
   }
 
   this.emit_procedures = function(procedures) {
