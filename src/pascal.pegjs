@@ -250,7 +250,7 @@ function_call "function call"
   = func:identifier _ "(" args:argument_list ")"  { return {expression: 'call', func: func, args: args}; }
 
 expression "expression"
-  = unary / comparision / or_expr
+  = comparision / or_expr
 
 unary_operator = "not" / "-"
 
@@ -278,7 +278,7 @@ and_expr
   = and_binary / base_expr
 
 base_expr
-  = primary / nested_expression
+  = unary / primary / nested_expression
 
 nested_expression 
   = "(" _ expression:expression _ ")" { return {expression: 'nested', nested: expression}; }
