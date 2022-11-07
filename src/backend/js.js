@@ -174,7 +174,7 @@ function Emitter(config) {
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable+'++') : (stmt.variable+'--');
         var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + format_expression(stmt.stop)) : (stmt.variable+'>=' + format_expression(stmt.stop));
-        this.emit_raw('for (' + stmt.variable + '=' + stmt.start + '; ' + stop_criterion + '; ' + update + ')');
+        this.emit_raw('for (' + stmt.variable + '=' + format_expression(stmt.start) + '; ' + stop_criterion + '; ' + update + ')');
         this.emit_statement(stmt.do);
         break;
       case 'while':
