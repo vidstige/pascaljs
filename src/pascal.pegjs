@@ -141,6 +141,7 @@ function_header
 
 function_declaration 
   = head:function_header _ construct:construct ";" _ { return {function: head.name, arguments: head.args, construct: construct, return_type: head.return_type}; }
+  / head:function_header _ "assembler" _ ";" _ construct:assembly_construct ";" _ { return {function: head.name, arguments: head.args, construct: construct}; }
 
 argument_list_declaration
   = first:argument_declaration? rest:(";" _ argument_declaration)* { return flatten((first ? [first] : []).concat(nth(rest, 2))); }

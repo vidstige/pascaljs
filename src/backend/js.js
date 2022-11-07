@@ -306,16 +306,20 @@ function Emitter(config) {
   this.emit_function = function(f) {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
     indentation++;
-    stack_push(_symbol_map);
-    const result_name = '_result';
-    stack_insert(_symbol_map, f.function, result_name);
-    this.emit_variable({'name': result_name, 'type': f.return_type});
-    this.emit_node(f.construct);
-    stack_pop(_symbol_map);
-    this.emit_raw('return ' + result_name + ";");
-    
-    indentation--;
-    this.emit_raw("}");
+    if (f.construct.block.statement == 'assembly_block') {
+      this.emit_node(f.construct);
+      this.emit_raw('return __registers.ax;');
+    } else {
+      stack_push(_symbol_map);
+      const result_name = '_result';
+      stack_insert(_symbol_map, f.function, result_name);
+      this.emit_variable({'name': result_name, 'type': f.return_type});
+      this.emit_node(f.construct);
+      stack_pop(_symbol_map);
+      this.emit_raw('return ' + result_name + ";");
+    }
+
+    indentation--; this.emit_raw("}");
 
     stack_insert(_function_map, f.function, f.function);
   }
