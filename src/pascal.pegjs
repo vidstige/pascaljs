@@ -54,7 +54,7 @@ program
   = "program" __ name:identifier ";" _ root:construct "."  { return {program: root, name: name}; }
 
 unit
-  = "unit" __ name:identifier ";" _ "interface" _ the_interface:interface_part _ "implementation" _ the_implementation:implementation_part _ "end" "." { return {'unit': {'interface': the_interface, 'implementation': the_implementation}, 'name': name}; }
+  = "unit" __ name:identifier ";" _ "interface" _ the_interface:interface_part _ "implementation" _ the_implementation:implementation_part _ block:(block / "end") "." _ { return {'unit': {'interface': the_interface, 'implementation': the_implementation}, 'name': name, block: block}; }
 
 uses
   = "uses" _ first:identifier rest:("," _ identifier)* ";" _ { return {uses: [first].concat(nth(rest, 2))}; }
