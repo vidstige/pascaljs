@@ -91,7 +91,7 @@ assembly_expression = assembly_lvalue / assembly_register / integer_literal
 
 newline = '\n' / '\r' '\n'?
 
-assembly_statements = all:(labeled_assembly_statement _)*  { return nth(all, 0); }
+assembly_statements = all:(labeled_assembly_statement ";"? _ )*  { return nth(all, 0); }
 
 assembly_label = "@" label:identifier { return label; }
 
