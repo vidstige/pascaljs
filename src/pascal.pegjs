@@ -234,8 +234,11 @@ if_else
 if
   = "if" _ e:expression _ "then" _ stmt:statement { return {statement: 'if', condition: e, then: stmt, else: null}; }
 
+range = 
+  low:literal _ ".." _ high:literal { return { low: low, high: high}; }
+
 case_match
-  = match:literal _ ":" _ then:statement _ ";" _ { return {match: match, then: then}; }
+  = match:(range / literal) _ ":" _ then:statement _ ";" _ { return {match: match, then: then}; }
 
 case
   = "case" __ variable:identifier __ "of" _ cases:(case_match*) _ otherwise:( "else" _ statements)? "end" { return {statement: 'case', variable: variable, cases: cases}; }
