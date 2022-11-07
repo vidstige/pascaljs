@@ -194,6 +194,19 @@ function Emitter(config) {
           this.emit_statement(stmt.else);
         }
         break;
+      case 'case':
+        this.emit_raw('switch (' + stmt.variable + ') {'); indentation++;
+        for (var i = 0; i < stmt.cases.length; i++) {
+          this.emit_raw('case ' + stmt.cases[i].match + ":");
+          this.emit_statement(stmt.cases[i].then);
+          this.emit_raw('break;');
+        }
+        if (stmt.otherwise) {
+          this.emit_raw('deafult:');
+          this.emit_statements(stmt.otherwise);
+        }
+        indentation--; this.emit_raw('}');
+        break;
       case 'with':
         const type = findVariable(stmt.lvalue);
         if (type.kind != 'record') {
