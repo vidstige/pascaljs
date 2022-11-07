@@ -220,6 +220,17 @@ function getBlockEnd(start, cfg, statements) {
   return index == cfg.nodes.length - 1 ? statements.length : cfg.nodes[index + 1]
 }
 
+function appendChild(a, b) {
+  // appends b onto a
+  if (b.statement == 'block') {
+    for (var statement of b.statements) {
+      a.push(statement);
+    }
+  } else {
+    a.push(b);
+  }
+}
+
 // converts dominator tree node into intermediate ast node
 function doTree(statements, node, cfg, rpo) {
   const inEdges = cfg.inEdges(node.value);
@@ -279,13 +290,7 @@ function doTree(statements, node, cfg, rpo) {
   for (var child of node.childs) {
     if (handled.has(child)) continue;  // skip childs included if (if any)
     const child_ast = doTree(statements, child, cfg, rpo);
-    if (child_ast.statement == 'block') {
-      for (var statement of child_ast.statements) {
-        iast.statements.push(statement);
-      }
-    } else {
-      iast.statements.push(child_ast);
-    }
+    appendChild(iast.statements, child_ast);
   }
 
   // if this node has one incoming back-edge, it's a loop header
