@@ -259,7 +259,7 @@ with = "with" __ lvalue:lvalue __ "do" __ stmt:statement { return {statement: 'w
 
 // HERE GOES EXPRESSIONS
 function_call "function call"
-  = func:identifier _ "(" args:argument_list ")"  { return {expression: 'call', func: func, args: args}; }
+  = func:identifier _ "(" _ args:argument_list ")"  { return {expression: 'call', func: func, args: args}; }
 
 expression "expression"
   = comparision / or_expr
