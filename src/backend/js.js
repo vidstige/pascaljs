@@ -46,6 +46,10 @@ function initializer_for(type) {
   return null;
 }
 
+function isRange(o) {
+  return o.low !== undefined && o.high !== undefined;
+}
+
 function Emitter(config) {
   var indentation = 0;
   this._emit_raw = function(line) {
@@ -195,17 +199,37 @@ function Emitter(config) {
         }
         break;
       case 'case':
-        this.emit_raw('switch (' + stmt.variable + ') {'); indentation++;
-        for (var i = 0; i < stmt.cases.length; i++) {
-          this.emit_raw('case ' + stmt.cases[i].match + ":");
-          this.emit_statement(stmt.cases[i].then);
-          this.emit_raw('break;');
+        if (stmt.cases.some(c => isRange(c.match))) {
+          function formatMatch(match, variable) {
+            if (isRange(match)) {
+              return match.low + " <= " + variable + " && " + variable + "<= " + match.high;
+            }
+            return variable + " == " + match;
+          }
+          // At last one case has a range. Just use if-statements
+          for (var i = 0; i < stmt.cases.length; i++) {
+            this.emit_raw((i == 0 ? '' : 'else ') + 'if (' + formatMatch(stmt.cases[i].match, stmt.variable) + ') {'); indentation++;
+            this.emit_statement(stmt.cases[i].then);
+            indentation--; this.emit_raw('}');
+          }
+          if (stmt.otherwise) {
+            this.emit_raw('else {'); indentation++;
+            this.emit_statements(stmt.otherwise);
+            indentation--; this.emit_raw('}');
+          }
+        } else {
+          this.emit_raw('switch (' + stmt.variable + ') {'); indentation++;
+          for (var i = 0; i < stmt.cases.length; i++) { 
+            this.emit_raw('case ' + stmt.cases[i].match + ":");
+            this.emit_statement(stmt.cases[i].then);
+            this.emit_raw('break;');
+          }
+          if (stmt.otherwise) {
+            this.emit_raw('deafult:');
+            this.emit_statements(stmt.otherwise);
+          }
+          indentation--; this.emit_raw('}');
         }
-        if (stmt.otherwise) {
-          this.emit_raw('deafult:');
-          this.emit_statements(stmt.otherwise);
-        }
-        indentation--; this.emit_raw('}');
         break;
       case 'with':
         const type = findVariable(stmt.lvalue);
