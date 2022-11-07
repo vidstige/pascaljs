@@ -28,6 +28,6 @@ build/%.js: tests/%.pas src/compile.js src/pascal.js src/backend/js.js src/backe
 clean:
 	rm -rf src/pascal.js build/
 
-.PRECIOUS: tests/actual/%.out build/%.js
+.PRECIOUS: tests/actual/%.out build/%.js tests/expectations/%.out
 
 .PHONY: test clean verify/%
