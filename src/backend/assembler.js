@@ -195,7 +195,7 @@ function translateAssemblerStatement(statement) {
       return {statement: 'assignment_with', to: statement.target, operator: '*', from: statement.source};
     case 'int':
       // TODO: this is just a no operaton (nop)
-      return {statement: 'statements', statements: []};
+      return {statement: 'block', statements: []};
     default:
       throw "Unknown mnemonic: " + statement.mnemonic;
   }
@@ -232,7 +232,7 @@ function doTree(statements, node, cfg, rpo) {
 
   // translate the assembler listing of this node into intermediate ast
   const iast = {
-    statement: 'statements',
+    statement: 'block',
     statements: translateBlock(statements.slice(start, isBranch(statements[end - 1]) ? end - 1 : end)),
   };
 
@@ -267,8 +267,6 @@ function doTree(statements, node, cfg, rpo) {
     }
 
     // wrap then and else parts in blocks
-    if (conditional.then) conditional.then.statement = 'block';
-    if (conditional.else) conditional.else.statement = 'block';
 
     // don't concat these childs
     handled.add(then);
@@ -281,7 +279,7 @@ function doTree(statements, node, cfg, rpo) {
   for (var child of node.childs) {
     if (handled.has(child)) continue;  // skip childs included if (if any)
     const child_ast = doTree(statements, child, cfg, rpo);
-    if (child_ast.statement == 'statements') {
+    if (child_ast.statement == 'block') {
       for (var statement of child_ast.statements) {
         iast.statements.push(statement);
       }
