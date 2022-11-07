@@ -191,6 +191,11 @@ function translateAssemblerStatement(statement) {
         to: '__registers.flags',
         from: {expression: 'binary', lhs: statement.b, operator: '-', rhs: statement.a},
       };
+    case 'mul':
+      return {statement: 'assignment_with', to: statement.target, operator: '*', from: statement.source};
+    case 'int':
+      // TODO: this is just a no operaton (nop)
+      return {statement: 'statements', statements: []};
     default:
       throw "Unknown mnemonic: " + statement.mnemonic;
   }
