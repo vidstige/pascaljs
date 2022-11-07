@@ -135,9 +135,6 @@ function Emitter(config) {
         this.emit_statements(stmt.statements);
         indentation--; this.emit_raw('}');
         break;
-      case 'statements':
-        this.emit_statements(stmt.statements);
-        break;
       case 'call':
         // Find boxes
         const f = callables[stmt.target];
