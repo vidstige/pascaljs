@@ -198,7 +198,7 @@ type "type"
 
 // STATEMENTS
 statement
-  = block / assembly_block / assignment / if_else / if / for / while / repeat / with / procedure_call
+  = block / assembly_block / assignment / if_else / if / case / for / while / repeat / with / procedure_call
 
 block
   = "begin" _ stmts:statements _ "end" { return {statement: 'block', statements: stmts}; }
@@ -233,6 +233,12 @@ if_else
 
 if
   = "if" _ e:expression _ "then" _ stmt:statement { return {statement: 'if', condition: e, then: stmt, else: null}; }
+
+case_match
+  = match:literal _ ":" _ then:statement _ ";" _ { return {match: match, then: then}; }
+
+case
+  = "case" __ variable:identifier __ "of" _ cases:(case_match*) _ otherwise:( "else" _ statements)? "end" { return {statement: 'case', variable: variable, cases: cases}; }
 
 for
   = "for" _ variable:identifier _ ":=" _ start:expression _ direction:("to" / "downto") _ stop:expression _ "do" _ stmt:statement { return {statement: 'for', variable: variable, start: start, stop: stop, direction: direction, do: stmt }; }
