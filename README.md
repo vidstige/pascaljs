@@ -35,7 +35,7 @@ WriteLn('x is ', x);
 ## Features
 
 - [x] Programs
-- [ ] Units
+- [x] Units
 
 ### Statements
 
@@ -49,6 +49,7 @@ WriteLn('x is ', x);
 - [x] `while`
 - [x] `repeat`
 - [x] `with`
+- [x] `case`
 - [x] Recursive calls
 
 ### Expressions
@@ -79,12 +80,11 @@ WriteLn('x is ', x);
 
 ### Assembler
 
-- [ ] Parse keywords
+- [x] Parse keywords
+- [x] Construct structured JavaScript flow control (`if-then-else`, `do-while`) from assembler
 - [ ] Adress variables and pointers
-- [ ] mov
-- [ ] int
-- [ ] loop
-- [ ] Conditionals
+- [x] Basic instruction set
+- [ ] `int` for graphics, sleeps, and more
 
 ### Stanard unit
 
