@@ -267,13 +267,13 @@ function doTree(statements, node, cfg, rpo) {
 
     if (isMerge(then, cfg)) {
       // the then-part cannot be empty - invert condition and swap then with else
-      iast.statements.push(conditional.then);  // put the then-part after the if
+      appendChild(iast.statements, conditional.then);  // put the then-part after the if
       conditional.condition = invert(conditional.condition);  // invert condition
       conditional.then = conditional.else;  // swap the then and else parts
       conditional.else = null;
     }
     if (isMerge(els3, cfg)) {
-      iast.statements.push(conditional.else);
+      appendChild(iast.statements, conditional.else);
       conditional.else = null;
     }
 
