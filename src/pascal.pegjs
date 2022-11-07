@@ -110,12 +110,14 @@ assembly_statement
   / "xor" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'xor', target: target, operand: operand}; }
   / "shr" _ target:assembly_lvalue _ "," _ operand:assembly_expression { return {mnemonic: 'shr', target: target, operand: operand}; }
   / "cmp" _ a:assembly_lvalue _ "," _ b:assembly_expression { return {mnemonic: 'cmp', a: a, b: b}; }
+  / "mul" _ operand:assembly_expression { return {mnemonic: 'mul', source: operand, target: 'ax'}; }
   / "push" _ operand:assembly_expression 
   / "pop" _ operand:assembly_expression 
   / "les" _ target:assembly_lvalue _ "," _ source:assembly_expression { return {mnemonic: 'les', target: target, source: source}; }
   / "jne" _ label:assembly_label { return {mnemonic: 'jne', to: label}; }
   / "jnz" _ label:assembly_label { return {mnemonic: 'jnz', to: label}; }
   / "loop" _ label:assembly_label { return {mnemonic: 'loop', to: label}; }
+  / "int" _ operand:integer_literal { return {mnemonic: 'int', operand: operand}; }
 
 // UNIT PARTS
 interface_part
