@@ -22,6 +22,17 @@ function find(stack, key, missing) {
   return missing;
 }
 
+function format_operator(operator) {
+  switch (operator) {
+    case 'mod': return '%';
+    case 'or': return '||';
+    case 'and': return '&&';
+    case 'not': return '!';
+  }
+  //throw "Unknown operator: " + operator;
+  return operator;
+}
+
 function initializer_for(type) {
   if (type.kind == 'array') {
     if (type.of.kind == "record") {
@@ -52,20 +63,12 @@ function isRange(o) {
 
 class Emitter {
   constructor(config) {
+    this.emit_raw = config.emit_raw || this._emit_raw;
     this.indentation = 0;
-    this.emit_raw = config.emit_raw || this._emit_raw;
-    const _symbol_map = [{}];
-    const _function_map = [{}];
-
-    const callables = {};
-    const variables = [{}]; // List of objects - pushed and popped as needed
-    function findVariable(name) {
-      const type = find(variables, name);
-      if (!type) {
-        throw "Unknown variable " + name;
-      }
-      return type;
-    }
+    this._symbol_map = [{}];
+    this._function_map = [{}];
+    this.callables = {};  // TODO: Why is there both a _function_map and callables?
+    this.variables = [{}]; // List of objects - pushed and popped as needed
 
     const unit_search_paths = config.unit_search_paths || [];
     for (var i = 0; i < unit_search_paths.length; i++) {
@@ -75,56 +78,8 @@ class Emitter {
       }
     }
 
-    function symbol(identifier) {
-      return find(_symbol_map, identifier, identifier);
-    }
-    function function_symbol(identifier) {
-      return find(_function_map, identifier, identifier);
-    }
-
-    function format_operator(operator) {
-      switch (operator) {
-        case 'mod': return '%';
-        case 'or': return '||';
-        case 'and': return '&&';
-        case 'not': return '!';
-      }
-      //throw "Unknown operator: " + operator;
-      return operator;
-    }
-
-    function format_expression(expression) {
-      if (expression === null)
-        return 'null';
-
-      if (expression.expression == 'binary') {
-        return format_expression(expression.lhs) + ' ' + format_operator(expression.operator) + ' ' + format_expression(expression.rhs);
-      }
-      if (expression.expression == 'unary') {
-        return format_operator(expression.operator) + expression.operand;
-      }
-      if (expression.expression == 'call') {
-        return function_symbol(expression.func) + "(" + expression.args.map(format_expression).join(', ') + ")";
-      }
-      if (expression.expression == 'nested') {
-        return "(" + format_expression(expression.nested) + ")";
-      }
-      if (expression.expression == 'field_access') {
-        return format_expression(expression.lvalue) + '.' + format_expression(expression.field);
-      }
-      if (expression.expression == 'array_access') {
-        return format_expression(expression.lvalue) + '[' + format_expression(expression.indexer) + ']';
-      }
-      // handle function calls without parenthesis
-      const f = find(_function_map, expression, null);
-      if (f !== null) {
-        return f + "()";
-      }
-      return symbol(expression);
-    }
-
     this._emit_assignment = function (stmt) {
-      this.emit_raw(format_expression(stmt.to) + " = " + format_expression(stmt.from) + ";");
+      this.emit_raw(this.format_expression(stmt.to) + " = " + this.format_expression(stmt.from) + ";");
     };
 
     this.emit_statement = function (stmt) {
@@ -136,13 +91,13 @@ class Emitter {
           break;
         case 'call':
           // Find boxes
-          const f = callables[stmt.target];
+          const f = this.callables[stmt.target];
           const boxes = [];
           const unboxes = [];
           const args = [];
-          stmt.arguments.map(function (argument, i) {
+          stmt.arguments.map((argument, i) => {
             const parameter = f ? f.arguments[i] : null;
-            const expression = format_expression(argument);
+            const expression = this.format_expression(argument);
             if (parameter && parameter.type.kind == 'boxed') {
               boxes.push(parameter.name + ': {value: ' + expression + '}');
               unboxes.push(expression + ' = _boxes.' + parameter.name + '.value;');
@@ -154,13 +109,13 @@ class Emitter {
           if (boxes.length > 0) {
             this.emit_raw('const _boxes = {' + boxes.join(', ') + '};');
             // replace assignments to variable inside function
-            this.emit_raw(function_symbol(stmt.target) + '(' + args.join(', ') + ');');
+            this.emit_raw(this.function_symbol(stmt.target) + '(' + args.join(', ') + ');');
             for (var i = 0; i < unboxes.length; i++) {
               this.emit_raw(unboxes[i]);
             }
           } else {
             // No boxing needed (no "var" arguments)
-            this.emit_raw(function_symbol(stmt.target) + '(' + args.join(', ') + ');');
+            this.emit_raw(this.function_symbol(stmt.target) + '(' + args.join(', ') + ');');
           }
           break;
         case 'assignment':
@@ -168,26 +123,26 @@ class Emitter {
           break;
         case 'assignment_with':
           // TODO: if op is + and format_expression(stmt.from) is 1. Use ++. Same with -
-          this.emit_raw(format_expression(stmt.to) + " " + stmt.operator + "= " + format_expression(stmt.from) + ";");
+          this.emit_raw(this.format_expression(stmt.to) + " " + stmt.operator + "= " + this.format_expression(stmt.from) + ";");
           break;
         case 'for':
           var update = stmt.direction == "to" ? (stmt.variable + '++') : (stmt.variable + '--');
-          var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + format_expression(stmt.stop)) : (stmt.variable + '>=' + format_expression(stmt.stop));
-          this.emit_raw('for (' + stmt.variable + '=' + format_expression(stmt.start) + '; ' + stop_criterion + '; ' + update + ')');
+          var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + this.format_expression(stmt.stop)) : (stmt.variable + '>=' + this.format_expression(stmt.stop));
+          this.emit_raw('for (' + stmt.variable + '=' + this.format_expression(stmt.start) + '; ' + stop_criterion + '; ' + update + ')');
           this.emit_statement(stmt.do);
           break;
         case 'while':
-          this.emit_raw('while (' + format_expression(stmt.condition) + ")");
+          this.emit_raw('while (' + this.format_expression(stmt.condition) + ")");
           this.emit_statement(stmt.do);
           break;
         case 'repeat':
           this.emit_raw('do {'); this.indentation++;
           this.emit_statements(stmt.statements);
           this.indentation--;
-          this.emit_raw('} while (!(' + format_expression(stmt.condition) + "));");
+          this.emit_raw('} while (!(' + this.format_expression(stmt.condition) + "));");
           break;
         case 'if':
-          this.emit_raw('if (' + format_expression(stmt.condition) + ')');
+          this.emit_raw('if (' + this.format_expression(stmt.condition) + ')');
           this.emit_statement(stmt.then);
           if (stmt.else) {
             this.emit_raw('else');
@@ -228,17 +183,17 @@ class Emitter {
           }
           break;
         case 'with':
-          const type = findVariable(stmt.lvalue);
+          const type = this.findVariable(stmt.lvalue);
           if (type.kind != 'record') {
             throw "Expected record";
           }
-          stack_push(_symbol_map);
+          stack_push(this._symbol_map);
           for (var i = 0; i < type.members.length; i++) {
             const member = type.members[i];
-            stack_insert(_symbol_map, member.name, stmt.lvalue + '.' + member.name);
+            stack_insert(this._symbol_map, member.name, stmt.lvalue + '.' + member.name);
           }
           this.emit_statement(stmt.do);
-          stack_pop(_symbol_map);
+          stack_pop(this._symbol_map);
           break;
         case 'assembly_block':
           const ast = assembler.reduceControlFlow(stmt.statements);
@@ -269,7 +224,7 @@ class Emitter {
     this.emit_variable = function (variable) {
       var initializer = initializer_for(variable.type);
       // add to variable scope
-      stack_insert(variables, variable.name, variable.type);
+      stack_insert(this.variables, variable.name, variable.type);
       this.emit_raw("var " + variable.name + " = " + initializer + ";");
     };
 
@@ -284,15 +239,15 @@ class Emitter {
     this.emit_procedure = function (p) {
       this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
       this.indentation++;
-      stack_push(_symbol_map);
+      stack_push(this._symbol_map);
       for (var i = 0; i < p.arguments.length; i++) {
         const argument = p.arguments[i];
         if (argument.type.kind == 'boxed') {
-          stack_insert(_symbol_map, argument.name, argument.name + '.value');
+          stack_insert(this._symbol_map, argument.name, argument.name + '.value');
         }
       }
       this.emit_node(p.construct);
-      stack_pop(_symbol_map);
+      stack_pop(this._symbol_map);
       this.indentation--; this.emit_raw("}");
     };
 
@@ -303,18 +258,18 @@ class Emitter {
         this.emit_node(f.construct);
         this.emit_raw('return __registers.ax;');
       } else {
-        stack_push(_symbol_map);
+        stack_push(this._symbol_map);
         const result_name = '_result';
-        stack_insert(_symbol_map, f.function, result_name);
+        stack_insert(this._symbol_map, f.function, result_name);
         this.emit_variable({ 'name': result_name, 'type': f.return_type });
         this.emit_node(f.construct);
-        stack_pop(_symbol_map);
+        stack_pop(this._symbol_map);
         this.emit_raw('return ' + result_name + ";");
       }
 
       this.indentation--; this.emit_raw("}");
 
-      stack_insert(_function_map, f.function, f.function);
+      stack_insert(this._function_map, f.function, f.function);
     };
 
     this.emit_procedures = function (procedures) {
@@ -333,8 +288,8 @@ class Emitter {
         this.emit_raw("const " + unit_name + " = require('" + unit_name + "');");
         for (var key in module) {
           if (module.hasOwnProperty(key)) {
-            stack_insert(_symbol_map, key, unit_name + '.' + key);
-            stack_insert(_function_map, key, unit_name + '.' + key);
+            stack_insert(this._symbol_map, key, unit_name + '.' + key);
+            stack_insert(this._function_map, key, unit_name + '.' + key);
           }
         }
       }
@@ -347,11 +302,11 @@ class Emitter {
           this.emit_uses(d.uses);
         }
         if (d.procedure) {
-          callables[d.procedure] = { procedure: d.procedure, arguments: d.arguments };
+          this.callables[d.procedure] = { procedure: d.procedure, arguments: d.arguments };
           this.emit_procedure(d);
         }
         if (d.function) {
-          callables[d.function] = { function: d.function, arguments: d.arguments };
+          this.callables[d.function] = { function: d.function, arguments: d.arguments };
           this.emit_function(d);
         }
         if (d.constants) {
@@ -364,11 +319,11 @@ class Emitter {
     };
 
     this.emit_node = function (node) {
-      stack_push(variables);
+      stack_push(this.variables);
       this.emit_declarations(node.declarations);
 
       this.emit_statement(node.block);
-      stack_pop(variables);
+      stack_pop(this.variables);
     };
 
     this.emit_notice = function () {
@@ -412,9 +367,52 @@ class Emitter {
       }
     };
   }
-  _emit_raw = function (line) {
+  _emit_raw(line) {
     console.log('  '.repeat(this.indentation) + line);
   }
+  symbol(identifier) {
+    return find(this._symbol_map, identifier, identifier);
+  }
+  findVariable(name) {
+    const type = find(this.variables, name);
+    if (!type) {
+      throw "Unknown variable " + name;
+    }
+    return type;
+  }
+  function_symbol(identifier) {
+    return find(this._function_map, identifier, identifier);
+  }
+  format_expression(expression) {
+    if (expression === null)
+      return 'null';
+
+    if (expression.expression == 'binary') {
+      return this.format_expression(expression.lhs) + ' ' + format_operator(expression.operator) + ' ' + this.format_expression(expression.rhs);
+    }
+    if (expression.expression == 'unary') {
+      return format_operator(expression.operator) + expression.operand;
+    }
+    if (expression.expression == 'call') {
+      return this.function_symbol(expression.func) + "(" + expression.args.map(arg => this.format_expression(arg)).join(', ') + ")";
+    }
+    if (expression.expression == 'nested') {
+      return "(" + this.format_expression(expression.nested) + ")";
+    }
+    if (expression.expression == 'field_access') {
+      return this.format_expression(expression.lvalue) + '.' + this.format_expression(expression.field); // TODO: This shouldn't be an expression?
+    }
+    if (expression.expression == 'array_access') {
+      return this.format_expression(expression.lvalue) + '[' + this.format_expression(expression.indexer) + ']';
+    }
+    // handle function calls without parenthesis
+    const f = find(this._function_map, expression, null);
+    if (f !== null) {
+      return f + "()";
+    }
+    return this.symbol(expression);
+  }
+
 }
 
 module.exports = {
