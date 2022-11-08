@@ -45,8 +45,7 @@ function initializer_for(type) {
   }
   if (type.kind == 'record') {
     var tmp = [];
-    for (var i = 0; i < type.members.length; i++) {
-      const member = type.members[i];
+    for (var member of type.members) {
       const initializer = initializer_for(member.type);
       if (initializer !== null) {
         tmp.push('"' + member.name + '": ' + initializer);
@@ -188,8 +187,7 @@ class Emitter {
           throw "Expected record";
         }
         stack_push(this._symbol_map);
-        for (var i = 0; i < type.members.length; i++) {
-          const member = type.members[i];
+        for (var member of type.members) {
           stack_insert(this._symbol_map, member.name, stmt.lvalue + '.' + member.name);
         }
         this.emit_statement(stmt.do);
@@ -205,17 +203,16 @@ class Emitter {
   }
 
   emit_statements(statements) {
-    for (var i = 0; i < statements.length; i++) {
-      this.emit_statement(statements[i]);
+    for (var statement of statements) {
+      this.emit_statement(statement);
     }
   }
   argument_list(ast_arguments) {
     return ast_arguments.map(function (arg) { return arg.name; }).join(', ');
   }
   emit_constants(constants) {
-    var c = constants;
-    for (var i = 0; i < c.length; i++) {
-      this.emit_raw('const ' + c[i].name + ' = ' + c[i].value + ';');
+    for (var constant of constants) {
+      this.emit_raw('const ' + constant.name + ' = ' + constant.value + ';');
     }
   }
   emit_variable(variable) {
@@ -226,8 +223,8 @@ class Emitter {
   }
   emit_variables(variables) {
     if (variables) {
-      for (var i = 0; i < variables.length; i++) {
-        this.emit_variable(variables[i]);
+      for (var variable of variables) {
+        this.emit_variable(variable);
       }
     }
   }
@@ -235,8 +232,7 @@ class Emitter {
     this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
     this.indentation++;
     stack_push(this._symbol_map);
-    for (var i = 0; i < p.arguments.length; i++) {
-      const argument = p.arguments[i];
+    for (var argument of p.arguments) {
       if (argument.type.kind == 'boxed') {
         stack_insert(this._symbol_map, argument.name, argument.name + '.value');
       }
@@ -268,14 +264,13 @@ class Emitter {
   emit_procedures(procedures) {
     var p = procedures;
     if (p) {
-      for (var i = 0; i < p.length; i++) {
-        this.emit_procedure(p[i]);
+      for (var procedure of procedures) {
+        this.emit_procedure(procedure);
       }
     }
   }
-  emit_uses(node) {
-    for (var i = 0; i < node.length; i++) {
-      const unit_name = node[i];
+  emit_uses(unit_names) {
+    for (var unit_name of unit_names) {
       const module = require(unit_name);
       this.emit_raw("const " + unit_name + " = require('" + unit_name + "');");
       for (var key in module) {
@@ -287,8 +282,7 @@ class Emitter {
     }
   }
   emit_declarations(declarations) {
-    for (var i = 0; i < declarations.length; i++) {
-      var d = declarations[i];
+    for (var d of declarations) {
       this.emit_uses(d.uses || []);
       if (d.procedure) {
         this.callables[d.procedure] = { procedure: d.procedure, arguments: d.arguments };
@@ -314,13 +308,10 @@ class Emitter {
   emit_export(interface_part) {
     // TODO: Export constants and vars
     // TODO: Export types. As `_types` perhaps?
-    var tmp = [];
-    for (var i = 0; i < interface_part.length; i++) {
-      if (interface_part[i].name) { // callable
-        const name = interface_part[i].name;
-        tmp.push(name + ': ' + name);
-      }
+    function isCallable(s) {
+      return s => s.name;
     }
+    const tmp = interface_part.filter(isCallable).map(i => i.name + ": " + i.name);
     this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
   };
 
