@@ -52,10 +52,7 @@ function isRange(o) {
 
 class Emitter {
   constructor(config) {
-    var indentation = 0;
-    this._emit_raw = function (line) {
-      console.log('  '.repeat(indentation) + line);
-    };
+    this.indentation = 0;
     this.emit_raw = config.emit_raw || this._emit_raw;
     const _symbol_map = [{}];
     const _function_map = [{}];
@@ -133,9 +130,9 @@ class Emitter {
     this.emit_statement = function (stmt) {
       switch (stmt.statement) {
         case 'block':
-          this.emit_raw('{'); indentation++;
+          this.emit_raw('{'); this.indentation++;
           this.emit_statements(stmt.statements);
-          indentation--; this.emit_raw('}');
+          this.indentation--; this.emit_raw('}');
           break;
         case 'call':
           // Find boxes
@@ -184,9 +181,9 @@ class Emitter {
           this.emit_statement(stmt.do);
           break;
         case 'repeat':
-          this.emit_raw('do {'); indentation++;
+          this.emit_raw('do {'); this.indentation++;
           this.emit_statements(stmt.statements);
-          indentation--;
+          this.indentation--;
           this.emit_raw('} while (!(' + format_expression(stmt.condition) + "));");
           break;
         case 'if':
@@ -207,17 +204,17 @@ class Emitter {
             }
             // At last one case has a range. Just use if-statements
             for (var i = 0; i < stmt.cases.length; i++) {
-              this.emit_raw((i == 0 ? '' : 'else ') + 'if (' + formatMatch(stmt.cases[i].match, stmt.variable) + ') {'); indentation++;
+              this.emit_raw((i == 0 ? '' : 'else ') + 'if (' + formatMatch(stmt.cases[i].match, stmt.variable) + ') {'); this.indentation++;
               this.emit_statement(stmt.cases[i].then);
-              indentation--; this.emit_raw('}');
+              this.indentation--; this.emit_raw('}');
             }
             if (stmt.otherwise) {
-              this.emit_raw('else {'); indentation++;
+              this.emit_raw('else {'); this.indentation++;
               this.emit_statements(stmt.otherwise);
-              indentation--; this.emit_raw('}');
+              this.indentation--; this.emit_raw('}');
             }
           } else {
-            this.emit_raw('switch (' + stmt.variable + ') {'); indentation++;
+            this.emit_raw('switch (' + stmt.variable + ') {'); this.indentation++;
             for (var i = 0; i < stmt.cases.length; i++) {
               this.emit_raw('case ' + stmt.cases[i].match + ":");
               this.emit_statement(stmt.cases[i].then);
@@ -227,7 +224,7 @@ class Emitter {
               this.emit_raw('deafult:');
               this.emit_statements(stmt.otherwise);
             }
-            indentation--; this.emit_raw('}');
+            this.indentation--; this.emit_raw('}');
           }
           break;
         case 'with':
@@ -286,7 +283,7 @@ class Emitter {
 
     this.emit_procedure = function (p) {
       this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
-      indentation++;
+      this.indentation++;
       stack_push(_symbol_map);
       for (var i = 0; i < p.arguments.length; i++) {
         const argument = p.arguments[i];
@@ -296,12 +293,12 @@ class Emitter {
       }
       this.emit_node(p.construct);
       stack_pop(_symbol_map);
-      indentation--; this.emit_raw("}");
+      this.indentation--; this.emit_raw("}");
     };
 
     this.emit_function = function (f) {
       this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
-      indentation++;
+      this.indentation++;
       if (f.construct.block.statement == 'assembly_block') {
         this.emit_node(f.construct);
         this.emit_raw('return __registers.ax;');
@@ -315,7 +312,7 @@ class Emitter {
         this.emit_raw('return ' + result_name + ";");
       }
 
-      indentation--; this.emit_raw("}");
+      this.indentation--; this.emit_raw("}");
 
       stack_insert(_function_map, f.function, f.function);
     };
@@ -414,6 +411,9 @@ class Emitter {
         throw "Unknown AST: " + ast;
       }
     };
+  }
+  _emit_raw = function (line) {
+    console.log('  '.repeat(this.indentation) + line);
   }
 }
 
