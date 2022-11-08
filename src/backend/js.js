@@ -241,7 +241,7 @@ class Emitter {
         stack_insert(this._symbol_map, argument.name, argument.name + '.value');
       }
     }
-    this.emit_node(p.construct);
+    this.emit_construct(p.construct);
     stack_pop(this._symbol_map);
     this.indentation--; this.emit_raw("}");
   }
@@ -249,14 +249,14 @@ class Emitter {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
     this.indentation++;
     if (f.construct.block.statement == 'assembly_block') {
-      this.emit_node(f.construct);
+      this.emit_construct(f.construct);
       this.emit_raw('return __registers.ax;');
     } else {
       stack_push(this._symbol_map);
       const result_name = '_result';
       stack_insert(this._symbol_map, f.function, result_name);
       this.emit_variable({ 'name': result_name, 'type': f.return_type });
-      this.emit_node(f.construct);
+      this.emit_construct(f.construct);
       stack_pop(this._symbol_map);
       this.emit_raw('return ' + result_name + ";");
     }
@@ -308,11 +308,10 @@ class Emitter {
       }
     }
   }
-  emit_node(node) {
+  emit_construct(construct) {
     stack_push(this.variables);
-    this.emit_declarations(node.declarations);
-
-    this.emit_statement(node.block);
+    this.emit_declarations(construct.declarations);
+    this.emit_statement(construct.block);
     stack_pop(this.variables);
   }
   emit_notice() {
@@ -341,7 +340,7 @@ class Emitter {
       // emit std unit
       this.emit_notice();
       this.emit_stdlib();
-      this.emit_node(ast.program);
+      this.emit_construct(ast.program);
     } else if (ast.unit) {
       this.emit_notice();
       this.emit_stdlib();
