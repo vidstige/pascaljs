@@ -289,9 +289,7 @@ class Emitter {
   emit_declarations(declarations) {
     for (var i = 0; i < declarations.length; i++) {
       var d = declarations[i];
-      if (d.uses) {
-        this.emit_uses(d.uses);
-      }
+      this.emit_uses(d.uses || []);
       if (d.procedure) {
         this.callables[d.procedure] = { procedure: d.procedure, arguments: d.arguments };
         this.emit_procedure(d);
@@ -300,12 +298,8 @@ class Emitter {
         this.callables[d.function] = { function: d.function, arguments: d.arguments };
         this.emit_function(d);
       }
-      if (d.constants) {
-        this.emit_constants(d.constants);
-      }
-      if (d.vars) {
-        this.emit_variables(d.vars);
-      }
+      this.emit_constants(d.constants || []);
+      this.emit_variables(d.vars);
     }
   }
   emit_construct(construct) {
