@@ -77,295 +77,282 @@ class Emitter {
         module.paths.push(path);
       }
     }
+  }
+  _emit_assignment(stmt) {
+    this.emit_raw(this.format_expression(stmt.to) + " = " + this.format_expression(stmt.from) + ";");
+  }
 
-    this._emit_assignment = function (stmt) {
-      this.emit_raw(this.format_expression(stmt.to) + " = " + this.format_expression(stmt.from) + ";");
-    };
-
-    this.emit_statement = function (stmt) {
-      switch (stmt.statement) {
-        case 'block':
-          this.emit_raw('{'); this.indentation++;
-          this.emit_statements(stmt.statements);
-          this.indentation--; this.emit_raw('}');
-          break;
-        case 'call':
-          // Find boxes
-          const f = this.callables[stmt.target];
-          const boxes = [];
-          const unboxes = [];
-          const args = [];
-          stmt.arguments.map((argument, i) => {
-            const parameter = f ? f.arguments[i] : null;
-            const expression = this.format_expression(argument);
-            if (parameter && parameter.type.kind == 'boxed') {
-              boxes.push(parameter.name + ': {value: ' + expression + '}');
-              unboxes.push(expression + ' = _boxes.' + parameter.name + '.value;');
-              args.push('_boxes.' + parameter.name);
-            } else {
-              args.push(expression);
-            }
-          });
-          if (boxes.length > 0) {
-            this.emit_raw('const _boxes = {' + boxes.join(', ') + '};');
-            // replace assignments to variable inside function
-            this.emit_raw(this.function_symbol(stmt.target) + '(' + args.join(', ') + ');');
-            for (var i = 0; i < unboxes.length; i++) {
-              this.emit_raw(unboxes[i]);
-            }
+  emit_statement = function (stmt) {
+    switch (stmt.statement) {
+      case 'block':
+        this.emit_raw('{'); this.indentation++;
+        this.emit_statements(stmt.statements);
+        this.indentation--; this.emit_raw('}');
+        break;
+      case 'call':
+        // Find boxes
+        const f = this.callables[stmt.target];
+        const boxes = [];
+        const unboxes = [];
+        const args = [];
+        stmt.arguments.map((argument, i) => {
+          const parameter = f ? f.arguments[i] : null;
+          const expression = this.format_expression(argument);
+          if (parameter && parameter.type.kind == 'boxed') {
+            boxes.push(parameter.name + ': {value: ' + expression + '}');
+            unboxes.push(expression + ' = _boxes.' + parameter.name + '.value;');
+            args.push('_boxes.' + parameter.name);
           } else {
-            // No boxing needed (no "var" arguments)
-            this.emit_raw(this.function_symbol(stmt.target) + '(' + args.join(', ') + ');');
+            args.push(expression);
           }
-          break;
-        case 'assignment':
-          this._emit_assignment(stmt);
-          break;
-        case 'assignment_with':
-          // TODO: if op is + and format_expression(stmt.from) is 1. Use ++. Same with -
-          this.emit_raw(this.format_expression(stmt.to) + " " + stmt.operator + "= " + this.format_expression(stmt.from) + ";");
-          break;
-        case 'for':
-          var update = stmt.direction == "to" ? (stmt.variable + '++') : (stmt.variable + '--');
-          var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + this.format_expression(stmt.stop)) : (stmt.variable + '>=' + this.format_expression(stmt.stop));
-          this.emit_raw('for (' + stmt.variable + '=' + this.format_expression(stmt.start) + '; ' + stop_criterion + '; ' + update + ')');
-          this.emit_statement(stmt.do);
-          break;
-        case 'while':
-          this.emit_raw('while (' + this.format_expression(stmt.condition) + ")");
-          this.emit_statement(stmt.do);
-          break;
-        case 'repeat':
-          this.emit_raw('do {'); this.indentation++;
-          this.emit_statements(stmt.statements);
-          this.indentation--;
-          this.emit_raw('} while (!(' + this.format_expression(stmt.condition) + "));");
-          break;
-        case 'if':
-          this.emit_raw('if (' + this.format_expression(stmt.condition) + ')');
-          this.emit_statement(stmt.then);
-          if (stmt.else) {
-            this.emit_raw('else');
-            this.emit_statement(stmt.else);
+        });
+        if (boxes.length > 0) {
+          this.emit_raw('const _boxes = {' + boxes.join(', ') + '};');
+          // replace assignments to variable inside function
+          this.emit_raw(this.function_symbol(stmt.target) + '(' + args.join(', ') + ');');
+          for (var i = 0; i < unboxes.length; i++) {
+            this.emit_raw(unboxes[i]);
           }
-          break;
-        case 'case':
-          if (stmt.cases.some(c => isRange(c.match))) {
-            function formatMatch(match, variable) {
-              if (isRange(match)) {
-                return match.low + " <= " + variable + " && " + variable + "<= " + match.high;
-              }
-              return variable + " == " + match;
+        } else {
+          // No boxing needed (no "var" arguments)
+          this.emit_raw(this.function_symbol(stmt.target) + '(' + args.join(', ') + ');');
+        }
+        break;
+      case 'assignment':
+        this._emit_assignment(stmt);
+        break;
+      case 'assignment_with':
+        // TODO: if op is + and format_expression(stmt.from) is 1. Use ++. Same with -
+        this.emit_raw(this.format_expression(stmt.to) + " " + stmt.operator + "= " + this.format_expression(stmt.from) + ";");
+        break;
+      case 'for':
+        var update = stmt.direction == "to" ? (stmt.variable + '++') : (stmt.variable + '--');
+        var stop_criterion = stmt.direction == "to" ? (stmt.variable + '<=' + this.format_expression(stmt.stop)) : (stmt.variable + '>=' + this.format_expression(stmt.stop));
+        this.emit_raw('for (' + stmt.variable + '=' + this.format_expression(stmt.start) + '; ' + stop_criterion + '; ' + update + ')');
+        this.emit_statement(stmt.do);
+        break;
+      case 'while':
+        this.emit_raw('while (' + this.format_expression(stmt.condition) + ")");
+        this.emit_statement(stmt.do);
+        break;
+      case 'repeat':
+        this.emit_raw('do {'); this.indentation++;
+        this.emit_statements(stmt.statements);
+        this.indentation--;
+        this.emit_raw('} while (!(' + this.format_expression(stmt.condition) + "));");
+        break;
+      case 'if':
+        this.emit_raw('if (' + this.format_expression(stmt.condition) + ')');
+        this.emit_statement(stmt.then);
+        if (stmt.else) {
+          this.emit_raw('else');
+          this.emit_statement(stmt.else);
+        }
+        break;
+      case 'case':
+        if (stmt.cases.some(c => isRange(c.match))) {
+          function formatMatch(match, variable) {
+            if (isRange(match)) {
+              return match.low + " <= " + variable + " && " + variable + "<= " + match.high;
             }
-            // At last one case has a range. Just use if-statements
-            for (var i = 0; i < stmt.cases.length; i++) {
-              this.emit_raw((i == 0 ? '' : 'else ') + 'if (' + formatMatch(stmt.cases[i].match, stmt.variable) + ') {'); this.indentation++;
-              this.emit_statement(stmt.cases[i].then);
-              this.indentation--; this.emit_raw('}');
-            }
-            if (stmt.otherwise) {
-              this.emit_raw('else {'); this.indentation++;
-              this.emit_statements(stmt.otherwise);
-              this.indentation--; this.emit_raw('}');
-            }
-          } else {
-            this.emit_raw('switch (' + stmt.variable + ') {'); this.indentation++;
-            for (var i = 0; i < stmt.cases.length; i++) {
-              this.emit_raw('case ' + stmt.cases[i].match + ":");
-              this.emit_statement(stmt.cases[i].then);
-              this.emit_raw('break;');
-            }
-            if (stmt.otherwise) {
-              this.emit_raw('deafult:');
-              this.emit_statements(stmt.otherwise);
-            }
+            return variable + " == " + match;
+          }
+          // At last one case has a range. Just use if-statements
+          for (var i = 0; i < stmt.cases.length; i++) {
+            this.emit_raw((i == 0 ? '' : 'else ') + 'if (' + formatMatch(stmt.cases[i].match, stmt.variable) + ') {'); this.indentation++;
+            this.emit_statement(stmt.cases[i].then);
             this.indentation--; this.emit_raw('}');
           }
-          break;
-        case 'with':
-          const type = this.findVariable(stmt.lvalue);
-          if (type.kind != 'record') {
-            throw "Expected record";
+          if (stmt.otherwise) {
+            this.emit_raw('else {'); this.indentation++;
+            this.emit_statements(stmt.otherwise);
+            this.indentation--; this.emit_raw('}');
           }
-          stack_push(this._symbol_map);
-          for (var i = 0; i < type.members.length; i++) {
-            const member = type.members[i];
-            stack_insert(this._symbol_map, member.name, stmt.lvalue + '.' + member.name);
+        } else {
+          this.emit_raw('switch (' + stmt.variable + ') {'); this.indentation++;
+          for (var i = 0; i < stmt.cases.length; i++) {
+            this.emit_raw('case ' + stmt.cases[i].match + ":");
+            this.emit_statement(stmt.cases[i].then);
+            this.emit_raw('break;');
           }
-          this.emit_statement(stmt.do);
-          stack_pop(this._symbol_map);
-          break;
-        case 'assembly_block':
-          const ast = assembler.reduceControlFlow(stmt.statements);
-          this.emit_statement(ast);
-          break;
-        default:
-          throw "Unknown statement: " + stmt.statement;
-      }
-    };
-
-    this.emit_statements = function (statements) {
-      for (var i = 0; i < statements.length; i++) {
-        this.emit_statement(statements[i]);
-      }
-    };
-
-    this.argument_list = function (ast_arguments) {
-      return ast_arguments.map(function (arg) { return arg.name; }).join(', ');
-    };
-
-    this.emit_constants = function (constants) {
-      var c = constants;
-      for (var i = 0; i < c.length; i++) {
-        this.emit_raw('const ' + c[i].name + ' = ' + c[i].value + ';');
-      }
-    };
-
-    this.emit_variable = function (variable) {
-      var initializer = initializer_for(variable.type);
-      // add to variable scope
-      stack_insert(this.variables, variable.name, variable.type);
-      this.emit_raw("var " + variable.name + " = " + initializer + ";");
-    };
-
-    this.emit_variables = function (variables) {
-      if (variables) {
-        for (var i = 0; i < variables.length; i++) {
-          this.emit_variable(variables[i]);
+          if (stmt.otherwise) {
+            this.emit_raw('deafult:');
+            this.emit_statements(stmt.otherwise);
+          }
+          this.indentation--; this.emit_raw('}');
         }
-      }
-    };
-
-    this.emit_procedure = function (p) {
-      this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
-      this.indentation++;
-      stack_push(this._symbol_map);
-      for (var i = 0; i < p.arguments.length; i++) {
-        const argument = p.arguments[i];
-        if (argument.type.kind == 'boxed') {
-          stack_insert(this._symbol_map, argument.name, argument.name + '.value');
+        break;
+      case 'with':
+        const type = this.findVariable(stmt.lvalue);
+        if (type.kind != 'record') {
+          throw "Expected record";
         }
-      }
-      this.emit_node(p.construct);
-      stack_pop(this._symbol_map);
-      this.indentation--; this.emit_raw("}");
-    };
-
-    this.emit_function = function (f) {
-      this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
-      this.indentation++;
-      if (f.construct.block.statement == 'assembly_block') {
-        this.emit_node(f.construct);
-        this.emit_raw('return __registers.ax;');
-      } else {
         stack_push(this._symbol_map);
-        const result_name = '_result';
-        stack_insert(this._symbol_map, f.function, result_name);
-        this.emit_variable({ 'name': result_name, 'type': f.return_type });
-        this.emit_node(f.construct);
+        for (var i = 0; i < type.members.length; i++) {
+          const member = type.members[i];
+          stack_insert(this._symbol_map, member.name, stmt.lvalue + '.' + member.name);
+        }
+        this.emit_statement(stmt.do);
         stack_pop(this._symbol_map);
-        this.emit_raw('return ' + result_name + ";");
+        break;
+      case 'assembly_block':
+        const ast = assembler.reduceControlFlow(stmt.statements);
+        this.emit_statement(ast);
+        break;
+      default:
+        throw "Unknown statement: " + stmt.statement;
+    }
+  }
+
+  emit_statements(statements) {
+    for (var i = 0; i < statements.length; i++) {
+      this.emit_statement(statements[i]);
+    }
+  }
+  argument_list(ast_arguments) {
+    return ast_arguments.map(function (arg) { return arg.name; }).join(', ');
+  }
+  emit_constants(constants) {
+    var c = constants;
+    for (var i = 0; i < c.length; i++) {
+      this.emit_raw('const ' + c[i].name + ' = ' + c[i].value + ';');
+    }
+  }
+  emit_variable(variable) {
+    var initializer = initializer_for(variable.type);
+    // add to variable scope
+    stack_insert(this.variables, variable.name, variable.type);
+    this.emit_raw("var " + variable.name + " = " + initializer + ";");
+  }
+  emit_variables(variables) {
+    if (variables) {
+      for (var i = 0; i < variables.length; i++) {
+        this.emit_variable(variables[i]);
       }
+    }
+  }
+  emit_procedure(p) {
+    this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
+    this.indentation++;
+    stack_push(this._symbol_map);
+    for (var i = 0; i < p.arguments.length; i++) {
+      const argument = p.arguments[i];
+      if (argument.type.kind == 'boxed') {
+        stack_insert(this._symbol_map, argument.name, argument.name + '.value');
+      }
+    }
+    this.emit_node(p.construct);
+    stack_pop(this._symbol_map);
+    this.indentation--; this.emit_raw("}");
+  }
+  emit_function(f) {
+    this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
+    this.indentation++;
+    if (f.construct.block.statement == 'assembly_block') {
+      this.emit_node(f.construct);
+      this.emit_raw('return __registers.ax;');
+    } else {
+      stack_push(this._symbol_map);
+      const result_name = '_result';
+      stack_insert(this._symbol_map, f.function, result_name);
+      this.emit_variable({ 'name': result_name, 'type': f.return_type });
+      this.emit_node(f.construct);
+      stack_pop(this._symbol_map);
+      this.emit_raw('return ' + result_name + ";");
+    }
 
-      this.indentation--; this.emit_raw("}");
+    this.indentation--; this.emit_raw("}");
 
-      stack_insert(this._function_map, f.function, f.function);
-    };
-
-    this.emit_procedures = function (procedures) {
-      var p = procedures;
-      if (p) {
-        for (var i = 0; i < p.length; i++) {
-          this.emit_procedure(p[i]);
+    stack_insert(this._function_map, f.function, f.function);
+  }
+  emit_procedures(procedures) {
+    var p = procedures;
+    if (p) {
+      for (var i = 0; i < p.length; i++) {
+        this.emit_procedure(p[i]);
+      }
+    }
+  }
+  emit_uses(node) {
+    for (var i = 0; i < node.length; i++) {
+      const unit_name = node[i];
+      const module = require(unit_name);
+      this.emit_raw("const " + unit_name + " = require('" + unit_name + "');");
+      for (var key in module) {
+        if (module.hasOwnProperty(key)) {
+          stack_insert(this._symbol_map, key, unit_name + '.' + key);
+          stack_insert(this._function_map, key, unit_name + '.' + key);
         }
       }
-    };
-
-    this.emit_uses = function (node) {
-      for (var i = 0; i < node.length; i++) {
-        const unit_name = node[i];
-        const module = require(unit_name);
-        this.emit_raw("const " + unit_name + " = require('" + unit_name + "');");
-        for (var key in module) {
-          if (module.hasOwnProperty(key)) {
-            stack_insert(this._symbol_map, key, unit_name + '.' + key);
-            stack_insert(this._function_map, key, unit_name + '.' + key);
-          }
-        }
+    }
+  }
+  emit_declarations(declarations) {
+    for (var i = 0; i < declarations.length; i++) {
+      var d = declarations[i];
+      if (d.uses) {
+        this.emit_uses(d.uses);
       }
-    };
-
-    this.emit_declarations = function (declarations) {
-      for (var i = 0; i < declarations.length; i++) {
-        var d = declarations[i];
-        if (d.uses) {
-          this.emit_uses(d.uses);
-        }
-        if (d.procedure) {
-          this.callables[d.procedure] = { procedure: d.procedure, arguments: d.arguments };
-          this.emit_procedure(d);
-        }
-        if (d.function) {
-          this.callables[d.function] = { function: d.function, arguments: d.arguments };
-          this.emit_function(d);
-        }
-        if (d.constants) {
-          this.emit_constants(d.constants);
-        }
-        if (d.vars) {
-          this.emit_variables(d.vars);
-        }
+      if (d.procedure) {
+        this.callables[d.procedure] = { procedure: d.procedure, arguments: d.arguments };
+        this.emit_procedure(d);
       }
-    };
-
-    this.emit_node = function (node) {
-      stack_push(this.variables);
-      this.emit_declarations(node.declarations);
-
-      this.emit_statement(node.block);
-      stack_pop(this.variables);
-    };
-
-    this.emit_notice = function () {
-      this.emit_raw("// Genrated by pascaljs. https://github.com/vidstige/pascaljs");
-    };
-
-    this.emit_export = function (interface_part) {
-      // TODO: Export constants and vars
-      // TODO: Export types. As `_types` perhaps?
-      var tmp = [];
-      for (var i = 0; i < interface_part.length; i++) {
-        if (interface_part[i].name) { // callable
-          const name = interface_part[i].name;
-          tmp.push(name + ': ' + name);
-        }
+      if (d.function) {
+        this.callables[d.function] = { function: d.function, arguments: d.arguments };
+        this.emit_function(d);
       }
-      this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
-    };
-
-    this.emit_stdlib = function () {
-      const stdlib = fs.readFileSync('./src/backend/_system.js');
-      this.emit_raw(stdlib);
-    };
-
-    this.emit = function (ast) {
-      if (ast.program) {
-        // emit std unit
-        this.emit_notice();
-        this.emit_stdlib();
-        this.emit_node(ast.program);
-      } else if (ast.unit) {
-        this.emit_notice();
-        this.emit_stdlib();
-
-        this.emit_declarations(ast.unit.interface);
-        this.emit_declarations(ast.unit.implementation);
-
-        this.emit_export(ast.unit.interface);
-      } else {
-        throw "Unknown AST: " + ast;
+      if (d.constants) {
+        this.emit_constants(d.constants);
       }
-    };
+      if (d.vars) {
+        this.emit_variables(d.vars);
+      }
+    }
+  }
+  emit_node(node) {
+    stack_push(this.variables);
+    this.emit_declarations(node.declarations);
+
+    this.emit_statement(node.block);
+    stack_pop(this.variables);
+  }
+  emit_notice() {
+    this.emit_raw("// Genrated by pascaljs. https://github.com/vidstige/pascaljs");
+  }
+  emit_export(interface_part) {
+    // TODO: Export constants and vars
+    // TODO: Export types. As `_types` perhaps?
+    var tmp = [];
+    for (var i = 0; i < interface_part.length; i++) {
+      if (interface_part[i].name) { // callable
+        const name = interface_part[i].name;
+        tmp.push(name + ': ' + name);
+      }
+    }
+    this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
+  };
+
+  emit_stdlib() {
+    const stdlib = fs.readFileSync('./src/backend/_system.js');
+    this.emit_raw(stdlib);
+  }
+
+  emit(ast) {
+    if (ast.program) {
+      // emit std unit
+      this.emit_notice();
+      this.emit_stdlib();
+      this.emit_node(ast.program);
+    } else if (ast.unit) {
+      this.emit_notice();
+      this.emit_stdlib();
+
+      this.emit_declarations(ast.unit.interface);
+      this.emit_declarations(ast.unit.implementation);
+
+      this.emit_export(ast.unit.interface);
+    } else {
+      throw "Unknown AST: " + ast;
+    }
   }
   _emit_raw(line) {
     console.log('  '.repeat(this.indentation) + line);
