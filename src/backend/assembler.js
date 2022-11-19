@@ -309,14 +309,9 @@ function doTree(statements, node, cfg, rpo) {
 }
 
 // reduces the assembler statements into ast (containing only structured control flow)
-function reduceControlFlow(statements) {
+export function reduceControlFlow(statements) {
   const cfg = ControlFlowGraph.build(statements);
   const rpo = cfg.postOrder().reverse();
   const domt = buildDominatorTree(cfg, rpo);
   return doTree(statements, domt, cfg, rpo);
 }
-
-module.exports = {
-  reduceControlFlow: reduceControlFlow,
-};
-  

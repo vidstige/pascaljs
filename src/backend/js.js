@@ -1,6 +1,6 @@
 // Emits js from pascal ast    
-const fs = require('fs');
-const assembler = require('./assembler.js');
+import { readFileSync } from 'fs';
+import { reduceControlFlow } from './assembler.js';
 
 function stack_push(stack, top) {
   stack.push(top || {});
@@ -60,7 +60,7 @@ function isRange(o) {
   return o.low !== undefined && o.high !== undefined;
 }
 
-class Emitter {
+export class Emitter {
   constructor(config) {
     this.emit_raw = config.emit_raw || this._emit_raw;
     this.indentation = 0;
@@ -194,7 +194,7 @@ class Emitter {
         stack_pop(this._symbol_map);
         break;
       case 'assembly_block':
-        const ast = assembler.reduceControlFlow(stmt.statements);
+        const ast = reduceControlFlow(stmt.statements);
         this.emit_statement(ast);
         break;
       default:
@@ -271,8 +271,8 @@ class Emitter {
   }
   emit_uses(unit_names) {
     for (var unit_name of unit_names) {
-      const module = require(unit_name);
-      this.emit_raw("const " + unit_name + " = require('" + unit_name + "');");
+      const module = import('../../build/' + unit_name + ".js");
+      this.emit_raw("import * as " + unit_name + " from '" + ('./' + unit_name + ".js") + "';")
       for (var key in module) {
         if (module.hasOwnProperty(key)) {
           stack_insert(this._symbol_map, key, unit_name + '.' + key);
@@ -311,12 +311,12 @@ class Emitter {
     function isCallable(s) {
       return s => s.name;
     }
-    const tmp = interface_part.filter(isCallable).map(i => i.name + ": " + i.name);
-    this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
+    //const tmp = interface_part.filter(isCallable).map(i => i.name + ": " + i.name);
+    //this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
   };
 
   emit_stdlib() {
-    const stdlib = fs.readFileSync('./src/backend/_system.js');
+    const stdlib = readFileSync('./src/backend/_system.js');
     this.emit_raw(stdlib);
   }
 
@@ -385,7 +385,3 @@ class Emitter {
   }
 
 }
-
-module.exports = {
-  Emitter: Emitter
-};

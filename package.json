@@ -7,6 +7,7 @@
     "test": "make test",
     "start": "node src/compile.js"
   },
+  "type": "module",
   "author": "vidstige <samuel.carlsson@gmail.com>",
   "license": "ISC",
   "devDependencies": {
