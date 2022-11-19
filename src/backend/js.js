@@ -261,14 +261,6 @@ export class Emitter {
 
     stack_insert(this._function_map, f.function, f.function);
   }
-  /*async emit_procedures(procedures) {
-    var p = procedures;
-    if (p) {
-      for (var procedure of procedures) {
-        await this.emit_procedure(procedure);
-      }
-    }
-  }*/
   async emit_uses(unit_names) {
     for (var unit_name of unit_names) {
       const module = await import('../../build/' + unit_name + ".js");
