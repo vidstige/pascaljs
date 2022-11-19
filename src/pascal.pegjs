@@ -80,7 +80,7 @@ assembly_construct
 
 // TODO: the '__registers' symbol should not be in the ast
 assembly_register
-  = ("ax" / "bx" / "cx" / "dx" / "ds" / "es" / "di" / "si") { return '__registers.' + text(); }
+  = ("ax" / "bx" / "cx" / "dx" / "ds" / "es" / "di" / "si") { return '_system.__registers.' + text(); }
 
 assembly_memory
   = segment:assembly_register ":" "[" assembly_register (operand:("+" / "-") offset:integer_literal)? "]"

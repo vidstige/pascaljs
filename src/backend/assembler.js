@@ -10,9 +10,9 @@ function branchCondition(statement) {
   switch (statement.mnemonic) {
     case 'jne':
     case 'jnz':
-      return '__registers.flags';
+      return '_system.__registers.flags';
     case 'loop':
-      return '--__registers.cx == 0'; // inverted because emitted as repeat-until
+      return '--_system.__registers.cx == 0'; // inverted because emitted as repeat-until
     default:
       throw "Unknown branch mnemonic " + statement.mnemonic;
   }
@@ -188,7 +188,7 @@ function translateAssemblerStatement(statement) {
     case 'cmp':
       return {
         statement: 'assignment',
-        to: '__registers.flags',
+        to: '_system.__registers.flags',
         from: {expression: 'binary', lhs: statement.b, operator: '-', rhs: statement.a},
       };
     case 'mul':
