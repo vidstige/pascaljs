@@ -1,9 +1,9 @@
-var fs = require('fs');
-var parser = require('./pascal.js')
-var emitter = require('./backend/js.js');
+import { readFileSync } from 'fs';
+import { parse, SyntaxError } from './pascal.js';
+import { Emitter } from './backend/js.js';
 
 var filepath = process.argv[2];
-var pascal_source = fs.readFileSync(filepath, "utf8");
+var pascal_source = readFileSync(filepath, "utf8");
 
 function blanks(line, n) {
     // replaces all characters except tabs with space. Useful for printing errors arrows
@@ -11,11 +11,11 @@ function blanks(line, n) {
 }
 
 try {
-    var ast = parser.parse(pascal_source);
-    var e = new emitter.Emitter({});
+    var ast = parse(pascal_source);
+    var e = new Emitter({});
     e.emit(ast);
 } catch (e) {
-    if (e instanceof(parser.SyntaxError)) {
+    if (e instanceof(SyntaxError)) {
         console.error(e.message);
         var location = e.location;
         var lines = pascal_source.split(/\r?\n/);

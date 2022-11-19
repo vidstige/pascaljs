@@ -2,7 +2,7 @@ SRCS=$(wildcard tests/*.pas)
 VERIFICATION=$(patsubst tests/%.pas,verify/%,$(SRCS))
 
 src/pascal.js: src/pascal.pegjs $(pegjs)
-	npx peggy src/pascal.pegjs
+	npx peggy --format es src/pascal.pegjs
 
 tests/actual/%.out: export NODE_PATH=build/
 tests/actual/%.out: build/%.js
