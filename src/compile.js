@@ -13,7 +13,7 @@ function blanks(line, n) {
 try {
     var ast = parse(pascal_source);
     var e = new Emitter({});
-    e.emit(ast);
+    await e.emit(ast);
 } catch (e) {
     if (e instanceof(SyntaxError)) {
         console.error(e.message);
