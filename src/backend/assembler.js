@@ -256,7 +256,7 @@ function doTree(statements, node, cfg, rpo) {
     const then = node.childs.find(child => child.value == outEdges[0].target);
     const els3 = node.childs.find(child => child.value == outEdges[1].target);
 
-    conditional = {
+    const conditional = {
       statement: 'if',
       condition: branchCondition(statements[end - 1]),
       then: doTree(statements, then, cfg, rpo),
