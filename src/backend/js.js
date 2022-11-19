@@ -1,5 +1,5 @@
 // Emits js from pascal ast    
-import { readFileSync } from 'fs';
+import { readFileSync, copyFileSync } from 'fs';
 import { reduceControlFlow } from './assembler.js';
 
 function stack_push(stack, top) {
@@ -246,7 +246,7 @@ export class Emitter {
     this.indentation++;
     if (f.construct.block.statement == 'assembly_block') {
       await this.emit_construct(f.construct);
-      this.emit_raw('return __registers.ax;');
+      this.emit_raw('return _system.__registers.ax;');
     } else {
       stack_push(this._symbol_map);
       const result_name = '_result';
@@ -264,8 +264,9 @@ export class Emitter {
   async emit_uses(unit_names) {
     for (var unit_name of unit_names) {
       const module = await import('../../build/' + unit_name + ".js");
-      for (var key in module) {    
+      for (var key in module) {
         stack_insert(this._function_map, key, unit_name + '.' + key);
+        stack_insert(this._symbol_map, key, unit_name + '.' + key);
       }
       this.emit_raw("import * as " + unit_name + " from '" + ('./' + unit_name + ".js") + "';");
     }
@@ -299,21 +300,20 @@ export class Emitter {
     // TODO: Export types. As `_types` perhaps?
     this.emit_raw('export {' + interface_part.filter(i => i.name).map(i => i.name).join(', ') + '};');
   };
-
-  emit_stdlib() {
-    const stdlib = readFileSync('./src/backend/_system.js');
-    this.emit_raw(stdlib);
+  use_stdlib(declarations) {
+    declarations.unshift({uses: ['_system']});
+    copyFileSync('./src/backend/_system.js', 'build/_system.js');
   }
-
   async emit(ast) {
     if (ast.program) {
       // emit std unit
       this.emit_notice();
-      this.emit_stdlib();
+      if (ast.program.declarations === undefined) ast.program.declarations = [];
+      this.use_stdlib(ast.program.declarations);
       await this.emit_construct(ast.program);
     } else if (ast.unit) {
       this.emit_notice();
-      this.emit_stdlib();
+      this.use_stdlib(ast.unit.interface);
 
       await this.emit_declarations(ast.unit.interface);
       await this.emit_declarations(ast.unit.implementation);

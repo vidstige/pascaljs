@@ -1,2 +1,2 @@
-var __registers = {};
-function WriteLn() { console.log(Array.prototype.slice.call(arguments).join('')); }
+export var __registers = {};
+export function WriteLn() { console.log(Array.prototype.slice.call(arguments).join('')); }
