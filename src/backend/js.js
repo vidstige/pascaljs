@@ -228,7 +228,7 @@ export class Emitter {
       }
     }
   }
-  emit_procedure(p) {
+  async emit_procedure(p) {
     this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
     this.indentation++;
     stack_push(this._symbol_map);
@@ -237,22 +237,22 @@ export class Emitter {
         stack_insert(this._symbol_map, argument.name, argument.name + '.value');
       }
     }
-    this.emit_construct(p.construct);
+    await this.emit_construct(p.construct);
     stack_pop(this._symbol_map);
     this.indentation--; this.emit_raw("}");
   }
-  emit_function(f) {
+  async emit_function(f) {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
     this.indentation++;
     if (f.construct.block.statement == 'assembly_block') {
-      this.emit_construct(f.construct);
+      await this.emit_construct(f.construct);
       this.emit_raw('return __registers.ax;');
     } else {
       stack_push(this._symbol_map);
       const result_name = '_result';
       stack_insert(this._symbol_map, f.function, result_name);
       this.emit_variable({ 'name': result_name, 'type': f.return_type });
-      this.emit_construct(f.construct);
+      await this.emit_construct(f.construct);
       stack_pop(this._symbol_map);
       this.emit_raw('return ' + result_name + ";");
     }
@@ -261,44 +261,41 @@ export class Emitter {
 
     stack_insert(this._function_map, f.function, f.function);
   }
-  emit_procedures(procedures) {
+  /*async emit_procedures(procedures) {
     var p = procedures;
     if (p) {
       for (var procedure of procedures) {
-        this.emit_procedure(procedure);
+        await this.emit_procedure(procedure);
       }
     }
-  }
-  emit_uses(unit_names) {
+  }*/
+  async emit_uses(unit_names) {
     for (var unit_name of unit_names) {
-      const module = import('../../build/' + unit_name + ".js");
-      this.emit_raw("import * as " + unit_name + " from '" + ('./' + unit_name + ".js") + "';")
-      for (var key in module) {
-        if (module.hasOwnProperty(key)) {
-          stack_insert(this._symbol_map, key, unit_name + '.' + key);
-          stack_insert(this._function_map, key, unit_name + '.' + key);
-        }
+      const module = await import('../../build/' + unit_name + ".js");
+      for (var key in module) {    
+        stack_insert(this._function_map, key, unit_name + '.' + key);
       }
+      this.emit_raw("import * as " + unit_name + " from '" + ('./' + unit_name + ".js") + "';");
     }
   }
-  emit_declarations(declarations) {
+  async emit_declarations(declarations) {
     for (var d of declarations) {
-      this.emit_uses(d.uses || []);
+      await this.emit_uses(d.uses || []);
       if (d.procedure) {
         this.callables[d.procedure] = { procedure: d.procedure, arguments: d.arguments };
-        this.emit_procedure(d);
+        await this.emit_procedure(d);
       }
       if (d.function) {
         this.callables[d.function] = { function: d.function, arguments: d.arguments };
-        this.emit_function(d);
+        await this.emit_function(d);
       }
       this.emit_constants(d.constants || []);
       this.emit_variables(d.vars);
     }
   }
-  emit_construct(construct) {
+  async emit_construct(construct) {
     stack_push(this.variables);
-    this.emit_declarations(construct.declarations);
+    await this.emit_declarations(construct.declarations);
     this.emit_statement(construct.block);
     stack_pop(this.variables);
   }
@@ -308,11 +305,7 @@ export class Emitter {
   emit_export(interface_part) {
     // TODO: Export constants and vars
     // TODO: Export types. As `_types` perhaps?
-    function isCallable(s) {
-      return s => s.name;
-    }
-    //const tmp = interface_part.filter(isCallable).map(i => i.name + ": " + i.name);
-    //this.emit_raw('module.exports = {' + tmp.join(', ') + "};");
+    this.emit_raw('export {' + interface_part.filter(i => i.name).map(i => i.name).join(', ') + '};');
   };
 
   emit_stdlib() {
@@ -320,18 +313,18 @@ export class Emitter {
     this.emit_raw(stdlib);
   }
 
-  emit(ast) {
+  async emit(ast) {
     if (ast.program) {
       // emit std unit
       this.emit_notice();
       this.emit_stdlib();
-      this.emit_construct(ast.program);
+      await this.emit_construct(ast.program);
     } else if (ast.unit) {
       this.emit_notice();
       this.emit_stdlib();
 
-      this.emit_declarations(ast.unit.interface);
-      this.emit_declarations(ast.unit.implementation);
+      await this.emit_declarations(ast.unit.interface);
+      await this.emit_declarations(ast.unit.implementation);
 
       this.emit_export(ast.unit.interface);
     } else {
