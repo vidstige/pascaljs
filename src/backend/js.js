@@ -338,7 +338,7 @@ export class Emitter {
   function_symbol(identifier) {
     const f = find(this._function_map, identifier);
     if (f === undefined) {
-      return identifier;
+      throw "Undefined symbol " + identifier;
     }
     return f;
   }
