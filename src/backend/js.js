@@ -317,6 +317,12 @@ export class Emitter {
       this.emit_notice();
       this.use_stdlib(ast.unit.interface);
 
+      // add functions/procedures from the interface into the symboltable
+      for (var d of ast.unit.interface) {
+        if (d.name) { // hacky way of detecting function/procedure
+          stack_insert(this._function_map, d.name, d.name);
+        }
+      }
       await this.emit_declarations(ast.unit.interface);
       await this.emit_declarations(ast.unit.implementation);
 
