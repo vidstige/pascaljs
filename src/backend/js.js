@@ -240,6 +240,8 @@ export class Emitter {
     await this.emit_construct(p.construct);
     stack_pop(this._symbol_map);
     this.indentation--; this.emit_raw("}");
+
+    stack_insert(this._function_map, p.procedure, p.procedure);
   }
   async emit_function(f) {
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
@@ -337,7 +339,11 @@ export class Emitter {
     return type;
   }
   function_symbol(identifier) {
-    return find(this._function_map, identifier, identifier);
+    const f = find(this._function_map, identifier);
+    if (f === undefined) {
+      return identifier;
+    }
+    return f;
   }
   format_expression(expression) {
     if (expression === null)
