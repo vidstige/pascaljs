@@ -78,9 +78,8 @@ export class Emitter {
     }
   }
   _emit_assignment(stmt) {
-    this.emit_raw(this.format_expression(stmt.to) + " = " + this.format_expression(stmt.from) + ";");
+    this.emit_raw(this.format_lvalue(stmt.to) + " = " + this.format_expression(stmt.from) + ";");
   }
-
   emit_statement = function (stmt) {
     switch (stmt.statement) {
       case 'block':
@@ -122,7 +121,7 @@ export class Emitter {
         break;
       case 'assignment_with':
         // TODO: if op is + and format_expression(stmt.from) is 1. Use ++. Same with -
-        this.emit_raw(this.format_expression(stmt.to) + " " + stmt.operator + "= " + this.format_expression(stmt.from) + ";");
+        this.emit_raw(this.format_lvalue(stmt.to) + " " + stmt.operator + "= " + this.format_expression(stmt.from) + ";");
         break;
       case 'for':
         var update = stmt.direction == "to" ? (stmt.variable + '++') : (stmt.variable + '--');
@@ -229,6 +228,8 @@ export class Emitter {
     }
   }
   async emit_procedure(p) {
+    stack_insert(this._function_map, p.procedure, p.procedure);
+
     this.emit_raw("function " + p.procedure + "(" + this.argument_list(p.arguments) + ") {");
     this.indentation++;
     stack_push(this._symbol_map);
@@ -240,10 +241,9 @@ export class Emitter {
     await this.emit_construct(p.construct);
     stack_pop(this._symbol_map);
     this.indentation--; this.emit_raw("}");
-
-    stack_insert(this._function_map, p.procedure, p.procedure);
   }
   async emit_function(f) {
+    stack_insert(this._function_map, f.function, f.function);
     this.emit_raw("function " + f.function + "(" + this.argument_list(f.arguments) + ") {");
     this.indentation++;
     if (f.construct.block.statement == 'assembly_block') {
@@ -258,10 +258,7 @@ export class Emitter {
       stack_pop(this._symbol_map);
       this.emit_raw('return ' + result_name + ";");
     }
-
     this.indentation--; this.emit_raw("}");
-
-    stack_insert(this._function_map, f.function, f.function);
   }
   async emit_uses(unit_names) {
     for (var unit_name of unit_names) {
@@ -345,6 +342,15 @@ export class Emitter {
     }
     return f;
   }
+  format_lvalue(expression) {
+    if (expression.expression == 'field_access') {
+      return this.format_lvalue(expression.lvalue) + '.' + this.format_lvalue(expression.field); // TODO: This shouldn't be an expression?
+    }
+    if (expression.expression == 'array_access') {
+      return this.format_lvalue(expression.lvalue) + '[' + this.format_lvalue(expression.indexer) + ']';
+    }
+    return this.symbol(expression);
+  }
   format_expression(expression) {
     if (expression === null)
       return 'null';
@@ -374,5 +380,4 @@ export class Emitter {
     }
     return this.symbol(expression);
   }
-
 }
