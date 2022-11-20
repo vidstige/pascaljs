@@ -77,6 +77,7 @@ WriteLn('x is ', x);
 - [x] Real
 - [x] Type checking
 - [x] Nested arrays/records
+- [ ] Export types from units
 
 ### Assembler
 
@@ -84,14 +85,20 @@ WriteLn('x is ', x);
 - [x] Construct structured JavaScript flow control (`if-then-else`, `do-while`) from assembler
 - [ ] Adress variables and pointers
 - [x] Basic instruction set
+- [ ] Low/High/Full 16-bit register semantics (`ah`, `al`, `ax`, etc)
 - [ ] `int` for graphics, sleeps, and more
+- [ ] Full instruction set
 
 ### Stanard unit
 
 - [x] `WriteLn´
 - [ ] Arithmetic
 - [ ] File  I/O
+- [ ] Strings
 - [x] In separate file
+
+### Demo
+- [ ] Separate _system.js for web
 
 ### Graphics subsystem
 
