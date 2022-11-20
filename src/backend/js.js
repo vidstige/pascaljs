@@ -192,6 +192,9 @@ export class Emitter {
         this.emit_statement(stmt.do);
         stack_pop(this._symbol_map);
         break;
+      case 'assembly_raw':
+        // Just ignore for now
+        break;
       case 'assembly_block':
         const ast = reduceControlFlow(stmt.statements);
         this.emit_statement(ast);

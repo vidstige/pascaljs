@@ -119,6 +119,9 @@ assembly_statement
   / "loop" _ label:assembly_label { return {mnemonic: 'loop', to: label}; }
   / "int" _ operand:integer_literal { return {mnemonic: 'int', operand: operand}; }
 
+// direct hex-encoded assembly instructions
+inline_assembly = "inline" _ "(" first:integer_literal _ ("/" _ integer_literal)* _ ")" { return {'statement': 'assembly_raw'}; }
+
 // UNIT PARTS
 interface_part
   = (uses / types / constants / vars / procedure_header / function_header)*
@@ -201,7 +204,7 @@ type "type"
 
 // STATEMENTS
 statement
-  = block / assembly_block / assignment / if_else / if / case / for / while / repeat / with / procedure_call
+  = block / assembly_block / inline_assembly / assignment / if_else / if / case / for / while / repeat / with / procedure_call
 
 block
   = "begin" _ stmts:statements _ "end" { return {statement: 'block', statements: stmts}; }
