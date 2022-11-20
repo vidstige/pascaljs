@@ -204,13 +204,18 @@ type "type"
 
 // STATEMENTS
 statement
-  = block / assembly_block / inline_assembly / assignment / if_else / if / case / for / while / repeat / with / procedure_call
+  = block / assembly_block / inline_assembly / assignment / assignment_with / if_else / if / case / for / while / repeat / with / procedure_call
 
 block
   = "begin" _ stmts:statements _ "end" { return {statement: 'block', statements: stmts}; }
 
 assignment
   = lvalue:lvalue _ ":=" _ value:expression { return {statement: 'assignment', to: lvalue, from: value}; }
+
+// Dec/Inc builtins
+assignment_with
+  = "Inc" _ "(" _ lvalue:lvalue _ "," _ value:expression _ ")" { return {statement: 'assignment_with', operator: '+', to: lvalue, from: value}; }
+  / "Dec" _ "(" _ lvalue:lvalue _ "," _ value:expression _ ")" { return {statement: 'assignment_with', operator: '-', to: lvalue, from: value}; }
 
 lvalue
   = field_access / array_accesses
